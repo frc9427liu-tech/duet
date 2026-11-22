@@ -413,17 +413,22 @@ footer a{display:block;padding:4px 0}footer a:hover{color:var(--ink);text-decora
   <p class="lead2">電腦端裝在你的電腦,手機端裝在你的手機,兩邊搭配使用。</p>
   <div class="dl" id="dl">
     <div class="dc"><span class="tag ok">v0 測試版</span><h3>Windows 電腦端</h3><p>下載後雙擊,會自動完成設定並顯示 8 位數配對碼;到手機 Duet「設定」→「用配對碼連接」輸入即可。免安裝 Python。</p><a class="btn" href="https://github.com/frc9427liu-tech/duet-dist-7k3q/releases/download/desktop-v0/DuetCore.exe">下載 Windows 電腦端</a><span class="hint">尚未簽章,Windows 會跳「未知發行者」:點「其他資訊」→「仍要執行」。</span></div>
-    <div class="dc"><span class="tag ok">v5.1 可用</span><h3>iPhone</h3><p>透過 SideStore 加入 Duet 來源安裝,不需要上架 App Store。需要 SideStore 與 Apple ID。</p><div class="acts2"><a class="btn" href="sidestore://source?url=https://raw.githubusercontent.com/frc9427liu-tech/duet-dist-7k3q/main/source.json">用 SideStore 開啟</a><button class="btn soft" id="cpsrc" type="button">複製來源網址</button></div><span class="hint" id="cphint">在 SideStore → 來源 → + 貼上網址;按鈕在 iPhone 上才會直接開啟。</span></div>
+    <div class="dc"><span class="tag ok">v6.3.1 可用</span><h3>iPhone</h3><p>透過 SideStore 加入 Duet 來源安裝,不需要上架 App Store。需要 SideStore 與 Apple ID。</p><div class="acts2"><a class="btn" href="sidestore://source?url=https://raw.githubusercontent.com/frc9427liu-tech/duet-dist-7k3q/main/source.json">用 SideStore 開啟</a><button class="btn soft" id="cpsrc" type="button">複製來源網址</button></div><a class="hint" href="#ios-guide" onclick="document.querySelector('#ios-guide details').open=true">第一次用?看完整安裝教學 ↓</a><span class="hint" id="cphint">在 SideStore → 來源 → + 貼上網址;按鈕在 iPhone 上才會直接開啟。</span></div>
     <div class="dc"><span class="tag soon">測試版</span><h3>Android</h3><p>目前提供傳檔與傳文字,日曆與剪貼簿規劃中。APK 測試版僅開放給受邀測試者。</p><a class="btn off">受邀測試</a></div>
   </div>
   <p class="note">系統需求:Windows 10/11 · iPhone 需 SideStore · Android 需允許安裝未知來源 App。</p>
   <div class="faq" id="ios-guide">
-    <details><summary>iPhone 安裝步驟(第一次約 15 分鐘,之後免費、不用付費開發者帳號)</summary>
-      <p><b>1. 準備:</b>一台 Windows 電腦、一條傳輸線、你自己的 Apple ID(免費,建議另開一個專用的)。</p>
-      <p><b>2. 裝 SideStore:</b>照 SideStore 官方文件(docs.sidestore.io)的步驟,用電腦把 SideStore 裝到 iPhone;完成後到「設定 → 一般 → VPN 與裝置管理」信任你的 Apple ID。</p>
-      <p><b>3. 加入 Duet 來源:</b>用 iPhone 開這個網頁,按「用 SideStore 開啟」(或按「複製來源網址」,到 SideStore → 來源 → + 貼上)。</p>
-      <p><b>4. 安裝 Duet:</b>在來源裡點 DuetLink → 取得。免費 Apple ID 的 App 每 7 天要續簽,SideStore 會在背景自動續簽,偶爾打開 SideStore 一下即可。</p>
-      <p><b>限制:</b>免費帳號同時最多 3 個側載 App;Duet 沒有上架 App Store,這是 Apple 的規定,不是軟體問題。</p>
+    <details><summary>iPhone 安裝教學(從零開始,第一次約 20~30 分鐘;之後免費、不用付費開發者帳號)</summary>
+      <p><b>先確認:</b>iPhone 有設鎖屏密碼、系統 iOS 15 以上;一台 64 位元 Windows 電腦(Windows 10 on ARM、32 位元不支援);一條傳輸線;一組 Apple ID(免費,建議另開一個專用的);安裝時手機要連 WiFi(行動網路不行)。</p>
+      <p><b>為什麼這麼麻煩?</b>Apple 不讓 iPhone 直接裝 App Store 以外的 App。SideStore 是用你自己的免費 Apple ID 幫 App 簽章的工具,只有「第一次」要用電腦裝,之後都在手機上完成。</p>
+      <p><b>A. 手機先準備(2 分鐘)</b><br>1) 在 App Store 搜尋並安裝「LocalDevVPN」。<br>2) 打開 LocalDevVPN,點「Connect」,出現「允許加入 VPN 設定」時按「允許」並輸入手機密碼。(之後每次要安裝或續簽 App 時,都要先打開它並連線。)</p>
+      <p><b>B. 電腦準備(5~10 分鐘)</b><br>1) 安裝 iTunes(從 Microsoft Store 或 Apple 官網下載;沒有它電腦認不到 iPhone)。<br>2) 下載並安裝 iloader:<a href="https://github.com/nab138/iloader/releases/latest/download/iloader-windows-x64.msi">iloader 安裝檔(.msi)</a>。</p>
+      <p><b>C. 把 SideStore 裝到手機(5 分鐘)</b><br>1) 用傳輸線接上電腦和 iPhone,手機跳出「信任這台電腦?」按「信任」並輸入密碼。<br>2) 打開 iloader → 用 Apple ID 登入(注意大小寫)→ 選你的 iPhone → 點「Install SideStore (Stable)」。<br>3) 等它跑完,手機桌面會出現 SideStore。</p>
+      <p><b>D. 在手機上信任並啟動 SideStore(3 分鐘)</b><br>1) 手機「設定 → 一般 → VPN 與裝置管理」→ 在「開發者 App」下點你的 Apple ID → 「信任」。<br>2) iOS 16 以上:到「設定 → 隱私權與安全性」最下面打開「開發者模式」,手機會重新開機,開機後再按「開啟」。<br>3) 打開 LocalDevVPN → Connect。<br>4) 打開 SideStore,用同一組 Apple ID 登入。<br>5) 點下方「My Apps」,點 SideStore 右邊寫著「7 DAYS」的按鈕,讓它自己續簽一次完成設定;跳出「撤銷或建立新憑證」時按「Yes / Refresh Now」。</p>
+      <p><b>E. 裝 Duet(2 分鐘)</b><br>1) 用 iPhone 開這個網頁,按上面的「用 SideStore 開啟」(或按「複製來源網址」,到 SideStore → Sources → + 貼上)。<br>2) 在來源裡點 DuetLink → 取得(GET)。<br>3) 裝好後打開 Duet,會有 5 頁新手導覽。</p>
+      <p><b>F. 之後怎麼維持</b><br>免費 Apple ID 的 App 每 7 天會過期。每隔幾天:打開 LocalDevVPN 連線 → 打開 SideStore → 「My Apps」點「Refresh All」。SideStore 也會在背景幫你續簽,但需要 LocalDevVPN 開著、且手機在 WiFi。過期的 App 打不開,續簽後就恢復,資料不會掉。</p>
+      <p><b>常見問題</b><br>• 電腦認不到 iPhone:確認 iTunes 裝好、換一條線或 USB 孔、手機要解鎖並按過「信任」。<br>• SideStore 說找不到配對檔 / 無法連線:先打開 LocalDevVPN 連線再試;手機更新或重設系統後配對檔會失效,要用 iloader 重新裝一次。<br>• 第 D 步找不到「開發者模式」:先完成 C 步(裝好 SideStore)之後這個選項才會出現。<br>• 同時最多 3 個側載 App(免費帳號的限制)。<br>• 我們的 App 沒上架 App Store,是因為 Apple 要每年 US$99 的開發者帳號,目前選擇不付;付了就能改成「點連結就裝」。</p>
+      <p>更完整、會隨 iOS 版本更新的官方說明:<a href="https://docs.sidestore.io/docs/installation/prerequisites">docs.sidestore.io</a>(英文)。畫面文字可能因 iOS 版本略有不同。</p>
     </details>
   </div>
   <div class="take">
