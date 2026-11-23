@@ -28,6 +28,7 @@ input[type=range]{width:100%}.row{display:flex;justify-content:space-between;ali
  <div class="row"><span class="mu" id="stat">連線中…</span><button class="sec" style="width:auto;padding:8px 14px" id="reload">重新整理</button></div>
  <h2>場景</h2><div id="scenes" class="grid"></div>
  <div id="devs"></div>
+ <h2>最近紀錄</h2><div class="card mu" id="log">載入中…</div>
  <h2>設定</h2><div class="card"><button class="sec" id="unpair">忘記這台電腦(只清除這支手機的配對)</button>
  <p class="mu">要完全撤銷:電腦配對頁 →「管理已配對的手機」。</p></div>
 </div>
@@ -97,6 +98,7 @@ async function refresh(){
    if(d.type==="dial"){const v=(d.state&&d.state.value)!=null?d.state.value:50;return '<div class="card'+off+'">'+nm+'<input type="range" min="'+Number(d.min||0)+'" max="'+Number(d.max||100)+'" value="'+Number(v)+'" data-dial="'+esc(d.id)+'"></div>'}
    if(d.type==="button")return '<div class="card'+off+'"><div class="row">'+nm+'<button style="width:auto" data-press="'+esc(d.id)+'">按一下</button></div></div>';
    return '<div class="card'+off+'"><div class="row">'+nm+'<span><button style="width:auto;margin-right:6px" data-on="'+esc(d.id)+'">開</button><button class="sec" style="width:auto" data-off="'+esc(d.id)+'">關</button></span></div></div>'}).join("")).join("");
+  try{const rl=await call("GET","home/log");if(rl.ok){const L=await rl.json();$("log").innerHTML=Array.isArray(L)&&L.length?L.slice(0,8).map(x=>esc(new Date((+x.t||0)*1000).toLocaleTimeString("zh-TW",{hour:"2-digit",minute:"2-digit"})+" "+(x.ok===false?"✗ ":"✓ ")+(x.what||""))).join("<br>"):"還沒有紀錄"}}catch(e){}
   $("stat").textContent="已連線 · "+new Date().toLocaleTimeString("zh-TW",{hour:"2-digit",minute:"2-digit"});
  }catch(e){$("stat").innerHTML='<span class="err">'+esc(e.message||"連不到電腦")+"(電腦要開機、Duet 要在跑)</span>"}}
 async function act(id,cmd,value){try{const r=await call("POST","home/act",{id,cmd,value});$("stat").textContent=r.ok?"已送出":(r.status===404?"找不到這個裝置":r.status===502?"裝置離線":r.status===401||r.status===403?"沒有權限或配對失效":"失敗("+r.status+")")}catch(e){$("stat").textContent="連不到電腦"}}
