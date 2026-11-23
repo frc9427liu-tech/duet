@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Duet 動畫教學</title>
+<style>
+:root{--bg:#fff;--ink:#202124;--mute:#5f6368;--blue:#1a73e8;--card:#f1f3f4;--ok:#188038;--line:#dadce0}
+@media(prefers-color-scheme:dark){:root{--bg:#171717;--ink:#e8eaed;--mute:#9aa0a6;--card:#262626;--line:#3c4043;--blue:#8ab4f8;--ok:#81c995}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 system-ui,"Microsoft JhengHei",sans-serif}
+.w{max-width:760px;margin:0 auto;padding:24px 16px 80px}
+h1{font-size:28px;margin:8px 0}.sub{color:var(--mute);margin-bottom:20px}
+.tabs{display:flex;gap:8px;margin:16px 0;flex-wrap:wrap}.tabs button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:20px;padding:8px 16px;font-size:15px;cursor:pointer}
+.tabs button.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+.stage{display:grid;grid-template-columns:1fr 1fr;gap:12px;background:var(--card);border-radius:20px;padding:20px;min-height:300px}
+@media(max-width:560px){.stage{grid-template-columns:1fr}}
+.dev{border:2px solid var(--line);border-radius:16px;padding:12px;background:var(--bg);position:relative;min-height:240px}
+.dev h4{margin:0 0 8px;font-size:13px;color:var(--mute)}
+.row{display:flex;align-items:center;gap:8px;padding:8px;border-radius:10px;border:1px solid var(--line);margin:6px 0;font-size:14px}
+.dot{width:10px;height:10px;border-radius:50%;background:#ea4335}
+.blink{animation:bl 1s infinite}@keyframes bl{50%{opacity:.2}}
+.hl{outline:3px solid var(--blue);animation:pulse 1.2s infinite}@keyframes pulse{50%{outline-color:transparent}}
+.ok .dot{background:var(--ok)}
+.step{display:none}.step.on{display:block}
+.cap{margin-top:14px;padding:14px 16px;border-radius:14px;background:var(--card)}.cap b{display:block;font-size:18px;margin-bottom:4px}
+.nav{display:flex;justify-content:space-between;align-items:center;margin-top:14px}
+.nav button{border:0;background:var(--blue);color:#fff;border-radius:12px;padding:10px 18px;font-size:15px;cursor:pointer}.nav button.g{background:var(--card);color:var(--ink)}
+.bar{height:4px;background:var(--line);border-radius:2px;margin-top:12px}.bar i{display:block;height:100%;background:var(--blue);border-radius:2px;transition:width .4s}
+.note{font-size:13px;color:var(--mute);margin-top:18px}
+</style></head><body><div class="w">
+<h1>Duet 動畫教學</h1><div class="sub">跟著動畫一步一步做。看不懂的地方,回 App 點「小助手」。</div>
+<div class="tabs"><button class="on" data-t="bt">藍牙喇叭</button><button data-t="pc">筆電 ↔ 電腦</button></div>
+<div id="stage"></div>
+<div class="cap" id="cap"></div>
+<div class="bar"><i id="bar"></i></div>
+<div class="nav"><button class="g" id="prev">上一步</button><span id="cnt" class="sub"></span><button id="next">下一步</button></div>
+<p class="note">這是示意動畫,畫面和你的實際電腦/喇叭可能略有不同;藍牙第一次配對一定要在電腦前做,這是為了安全。</p>
+</div>
+<script>
+const G={
+bt:[
+ {c:['喇叭進入配對模式','打開喇叭,長按「藍牙」鍵幾秒,直到燈快速閃爍(或聽到「配對中」)。'],
+  l:'<div class="dev"><h4>🔊 喇叭</h4><div class="row hl"><span class="dot blink"></span>藍牙燈:快速閃爍 = 配對中</div></div>',r:'<div class="dev"><h4>📱 手機</h4><div class="row">智慧家 → + → 新增裝置 → 藍牙喇叭</div></div>'},
+ {c:['在電腦配對一次','電腦:設定 → 藍牙與裝置 → 新增裝置 → 藍牙 → 選你的喇叭 → 連線。這步要有人在電腦前。'],
+  l:'<div class="dev"><h4>💻 電腦 設定</h4><div class="row">藍牙與裝置</div><div class="row hl">＋ 新增裝置 → 藍牙</div><div class="row">我的喇叭 …連線中</div></div>',r:'<div class="dev"><h4>🔊 喇叭</h4><div class="row ok"><span class="dot"></span>已連線(燈變恆亮)</div></div>'},
+ {c:['手機按「偵測」','手機精靈第 3 步按偵測,清單出現你的喇叭,點它、取名字(例:書桌喇叭)、按「加入智慧家」。'],
+  l:'<div class="dev"><h4>📱 手機 精靈</h4><div class="row ok"><span class="dot"></span>手機連得到電腦 ✓</div><div class="row hl">☑ 我的喇叭(藍牙)</div><div class="row">名字:書桌喇叭 [加入智慧家]</div></div>',r:'<div class="dev"><h4>💻 電腦</h4><div class="row ok"><span class="dot"></span>Duet 電腦端執行中</div></div>'},
+ {c:['完成,試試看','回到智慧家清單,點「書桌喇叭」,電腦就把聲音切到它。喇叭關機會變灰(離線)。'],
+  l:'<div class="dev"><h4>📱 智慧家</h4><div class="row hl ok"><span class="dot"></span>書桌喇叭(點一下切換聲音)</div><div class="row">電腦音量 ▬▬▬○▬</div></div>',r:'<div class="dev"><h4>💻 電腦 聲音輸出</h4><div class="row ok"><span class="dot"></span>輸出:書桌喇叭 ✓</div></div>'}
+],
+pc:[
+ {c:['兩台都裝 Duet 電腦端','到 Duet 官網下載 Windows 版,兩台都裝好,桌面會有「Duet 配對」捷徑。'],
+  l:'<div class="dev"><h4>💻 電腦 A</h4><div class="row ok"><span class="dot"></span>Duet 電腦端</div></div>',r:'<div class="dev"><h4>💻 筆電 B</h4><div class="row ok"><span class="dot"></span>Duet 電腦端</div></div>'},
+ {c:['在筆電複製連接碼','在筆電雙擊「Duet 配對」,畫面下方一長串 DUET1. 開頭的「連接碼」,全選複製。'],
+  l:'<div class="dev"><h4>💻 筆電 B 配對頁</h4><div class="row">配對碼 1234 5678</div><div class="row hl">連接碼:DUET1.eyJ1Ijoi…(複製)</div></div>',r:'<div class="dev"><h4>💻 電腦 A</h4><div class="row">等著貼上</div></div>'},
+ {c:['在電腦貼上','電腦 A:智慧家裝置設定 → 連接另一台電腦 → 名稱填「筆電」→ 貼連接碼 → 連接。'],
+  l:'<div class="dev"><h4>💻 電腦 A 裝置設定</h4><div class="row">名稱:筆電</div><div class="row hl">連接碼:DUET1.eyJ1Ijoi… [連接]</div></div>',r:'<div class="dev"><h4>💻 筆電 B</h4><div class="row ok"><span class="dot"></span>已配對電腦 A</div></div>'},
+ {c:['手機看得到筆電了','手機智慧家清單多一個房間「筆電」:音量、亮度、靜音、關螢幕、鎖定。想雙向控制,再反過來做一次。'],
+  l:'<div class="dev"><h4>📱 智慧家</h4><div class="row hl ok"><span class="dot"></span>筆電 · 音量</div><div class="row ok"><span class="dot"></span>筆電 · 鎖定</div></div>',r:'<div class="dev"><h4>💻 筆電 B</h4><div class="row ok"><span class="dot"></span>收到指令</div></div>'}
+]};
+let t='bt',i=0;
+function R(){const s=G[t][i];document.getElementById('stage').innerHTML='<div class="stage">'+s.l+s.r+'</div>';
+document.getElementById('cap').innerHTML='<b>步驟 '+(i+1)+':'+s.c[0]+'</b>'+s.c[1];
+document.getElementById('cnt').textContent=(i+1)+' / '+G[t].length;document.getElementById('bar').style.width=((i+1)/G[t].length*100)+'%';
+document.getElementById('prev').style.visibility=i?'visible':'hidden';document.getElementById('next').textContent=i==G[t].length-1?'重看':'下一步'}
+document.getElementById('next').onclick=()=>{i=(i+1)%G[t].length;R()};
+document.getElementById('prev').onclick=()=>{if(i>0){i--;R()}};
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{t=b.dataset.t;i=0;document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('on',x===b));R()});
+const q=new URLSearchParams(location.search).get('t');if(q&&G[q]){t=q;document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('on',x.dataset.t===q))}
+R();
+</script></body></html>
