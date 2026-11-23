@@ -28,6 +28,8 @@ input[type=range]{width:100%}.row{display:flex;justify-content:space-between;ali
  <div class="row"><span class="mu" id="stat">連線中…</span><button class="sec" style="width:auto;padding:8px 14px" id="reload">重新整理</button></div>
  <h2>電腦狀態</h2><div class="card" id="st">載入中…</div>
  <h2>場景</h2><div id="scenes" class="grid"></div>
+ <h2>我的場景(新增/編輯)</h2><div class="card" id="myscn"></div>
+ <div class="card hide" id="sced"></div>
  <h2>計時器(幾分鐘後執行場景)</h2><p class="sub" style="font-size:12px;opacity:.7;margin:2px 0">注意:電腦或 Duet 電腦端重開後,計時器會消失。</p>
  <div class="card"><select id="tsc" style="font:inherit;width:100%;padding:10px;border-radius:10px"></select>
   <div class="grid" style="grid-template-columns:repeat(3,1fr);margin-top:10px"><button class="sec" data-tm="15">15 分</button><button class="sec" data-tm="30">30 分</button><button class="sec" data-tm="60">60 分</button></div>
@@ -98,6 +100,7 @@ async function refresh(){
   const pT=call("GET","home/timers").catch(()=>null),pS=call("GET","home/status").catch(()=>null),pL=call("GET","home/log").catch(()=>null);
   const devs=await rd.json(),sc=await rs.json();if(!Array.isArray(devs)||!Array.isArray(sc))throw new Error("電腦回應格式不對");
   $("scenes").innerHTML=sc.map(x=>'<button class="sec" data-sc="'+esc(x.id)+'">'+esc(x.name)+'</button>').join("")||'<span class="mu">還沒有場景</span>';
+  DEVS=devs.filter(d=>/^(pc|au)\./.test(d.id));SCN=sc;renderMy();
   $("tsc").innerHTML=sc.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.name)+'</option>').join("");
   try{const rt2=await pT;if(rt2&&rt2.ok){const T=await rt2.json();$("tlist").innerHTML=Array.isArray(T)&&T.length?T.map(x=>esc(x.name)+" · 剩 "+Math.ceil(Number(x.left)/60)+" 分 <a href='#' data-tc='"+esc(x.id)+"'>取消</a>").join("<br>"):"沒有進行中的計時器"}}catch(e){}
   const rooms={};devs.forEach(d=>{const k=d.room||"我的裝置";(rooms[k]=rooms[k]||[]).push(d)});
@@ -117,6 +120,39 @@ document.addEventListener("click",async e=>{const t=e.target;
  else if(t.dataset.tc){e.preventDefault();try{await call("POST","home/timer",{cancel:t.dataset.tc});refresh()}catch(x){}}
  else if(t.dataset.press)act(t.dataset.press,"press");else if(t.dataset.on)act(t.dataset.on,"on");else if(t.dataset.off)act(t.dataset.off,"off")});
 let dt=null;document.addEventListener("input",e=>{const t=e.target;if(t.dataset&&t.dataset.dial){clearTimeout(dt);dt=setTimeout(()=>act(t.dataset.dial,"set",+t.value),350)}});
+
+let DEVS=[],SCN=[],EDIT=null;const DAYN=["一","二","三","四","五","六","日"];
+function cmdsOf(d){return d&&d.type==="switch"?[["on","開"],["off","關"],["toggle","切換"]]:d&&d.type==="dial"?[["set","設成"]]:[["press","按下"]]}
+function renderMy(){const my=SCN.filter(x=>!x.builtin);
+ $("myscn").innerHTML=(my.map(x=>'<div class="row" style="margin-bottom:8px"><span><b>'+esc(x.name)+'</b> <span class="mu">'+(x.when?(x.when==="pc_lock"?"電腦鎖定時":"電腦解鎖時"):x.at?(x.at+(x.days?" 週"+x.days.split("").map(c=>DAYN[+c]).join(""):" 每天")):"手動")+'</span></span><span><button class="sec" style="width:auto;margin-right:6px" data-sced="'+esc(x.id)+'">編輯</button><button class="sec" style="width:auto" data-scdel="'+esc(x.id)+'">刪除</button></span></div>').join("")||'<span class="mu">還沒有自訂場景</span>')+'<p style="margin:10px 0 0"><button data-scnew="1">新增場景</button></p><p class="mu">網頁版只能用電腦功能(音量、亮度、靜音、音訊輸出);要用燈或快捷鍵請在 iPhone App 或電腦設定頁。</p>'}
+function openEd(sc){EDIT={id:sc?sc.id:"",name:sc?sc.name:"",steps:sc?sc.steps.map(s=>({...s})):[],trig:sc&&sc.when?sc.when:sc&&sc.at?"time":"none",at:sc&&sc.at||"22:00",days:new Set((sc&&sc.days||"").split("").map(Number))};drawEd();$("sced").classList.remove("hide");$("sced").scrollIntoView({behavior:"smooth"})}
+function drawEd(){const E=EDIT;
+ const opt=(sel)=>DEVS.map(d=>'<option value="'+esc(d.id)+'"'+(d.id===sel?" selected":"")+'>'+esc((d.room||"")+"・"+d.name)+'</option>').join("");
+ $("sced").innerHTML='<b>'+(E.id?"編輯場景":"新增場景")+'</b><p><input id="en" maxlength="20" placeholder="場景名稱,例如:晚安" value="'+esc(E.name)+'" style="font:inherit;width:100%;padding:10px;border-radius:10px"></p>'+
+ E.steps.map((s,i)=>{const d=DEVS.find(x=>x.id===s.dev)||DEVS[0];return '<div class="row" style="gap:6px;margin:6px 0"><select data-sd="'+i+'" style="flex:1;min-width:0;padding:8px;border-radius:8px">'+opt(s.dev)+'</select><select data-sc2="'+i+'" style="padding:8px;border-radius:8px">'+cmdsOf(d).map(c=>'<option value="'+c[0]+'"'+(c[0]===s.cmd?" selected":"")+'>'+c[1]+'</option>').join("")+'</select>'+(s.cmd==="set"?'<input type="number" data-sv="'+i+'" value="'+Number(s.value||0)+'" min="'+Number(d.min||0)+'" max="'+Number(d.max||100)+'" style="width:64px;padding:8px;border-radius:8px">':"")+'<button class="sec" style="width:auto;padding:8px 10px" data-sx="'+i+'">✕</button></div>'}).join("")+
+ '<p><button class="sec" data-sadd="1" '+(DEVS.length&&E.steps.length<12?"":"disabled")+'>+ 新增動作</button></p>'+
+ '<p>自動觸發 <select id="etr" style="padding:8px;border-radius:8px"><option value="none">不自動</option><option value="time">定時</option><option value="pc_lock">電腦鎖定時</option><option value="pc_unlock">電腦解鎖時</option></select> '+(E.trig==="time"?'<input type="time" id="eat" value="'+esc(E.at)+'" style="padding:8px;border-radius:8px">':"")+'</p>'+
+ (E.trig==="time"?'<p>'+DAYN.map((n,i)=>'<button class="'+(E.days.has(i)?"":"sec")+'" style="width:38px;height:38px;border-radius:19px;padding:0;margin-right:4px" data-dy="'+i+'">'+n+'</button>').join("")+'<br><span class="mu">'+(E.days.size===0||E.days.size===7?"每天執行":"只在選到的星期執行")+'(自動觸發由電腦執行,電腦要開著)</span></p>':"")+
+ '<div class="row"><button data-ssave="1">儲存</button><button class="sec" data-scancel="1">取消</button></div><div id="eerr" class="err"></div>';
+ $("etr").value=E.trig}
+function syncEd(){if(!EDIT)return;const n=$("en");if(n)EDIT.name=n.value;const a=$("eat");if(a)EDIT.at=a.value||EDIT.at}
+document.addEventListener("change",e=>{const t=e.target;if(!EDIT||!t.dataset)return;syncEd();
+ if(t.id==="etr"){EDIT.trig=t.value;drawEd()}
+ else if(t.dataset.sd!==undefined){const s=EDIT.steps[+t.dataset.sd];s.dev=t.value;s.cmd=cmdsOf(DEVS.find(x=>x.id===t.value))[0][0];drawEd()}
+ else if(t.dataset.sc2!==undefined){const s=EDIT.steps[+t.dataset.sc2];s.cmd=t.value;const d=DEVS.find(x=>x.id===s.dev);if(s.cmd==="set"&&s.value==null)s.value=Number(d&&d.min||0);drawEd()}
+ else if(t.dataset.sv!==undefined)EDIT.steps[+t.dataset.sv].value=+t.value});
+document.addEventListener("click",async e=>{const t=e.target;if(!t.dataset)return;
+ if(t.dataset.scnew)openEd(null);
+ else if(t.dataset.sced)openEd(SCN.find(x=>x.id===t.dataset.sced));
+ else if(t.dataset.scdel){if(confirm("刪除這個場景?(它的計時器也會取消)")){const r=await call("POST","home/scene-del",{id:t.dataset.scdel});$("stat").textContent=r.ok?"已刪除":"刪除失敗("+r.status+")";refresh()}}
+ else if(!EDIT)return;
+ else if(t.dataset.sadd){syncEd();const d=DEVS[0];EDIT.steps.push({dev:d.id,cmd:cmdsOf(d)[0][0],value:Number(d.min||0)});drawEd()}
+ else if(t.dataset.sx){syncEd();EDIT.steps.splice(+t.dataset.sx,1);drawEd()}
+ else if(t.dataset.dy){syncEd();const i=+t.dataset.dy;EDIT.days.has(i)?EDIT.days.delete(i):EDIT.days.add(i);drawEd()}
+ else if(t.dataset.scancel){EDIT=null;$("sced").classList.add("hide")}
+ else if(t.dataset.ssave){syncEd();const E=EDIT;if(!E.name.trim()){$("eerr").textContent="請輸入名稱";return}if(!E.steps.length){$("eerr").textContent="至少要有一個動作";return}
+  const body={id:E.id,name:E.name.trim(),icon:"sparkles",at:E.trig==="time"?E.at:"",when:E.trig==="pc_lock"||E.trig==="pc_unlock"?E.trig:"",days:E.trig==="time"?[...E.days].sort().join(""):"",steps:E.steps.map(s=>({dev:s.dev,cmd:s.cmd,value:Math.round(+s.value||0)}))};
+  try{const r=await call("POST","home/scene-save",body);if(r.ok){EDIT=null;$("sced").classList.add("hide");$("stat").textContent="場景已儲存";refresh()}else $("eerr").textContent=r.status===403?"網頁版只能用電腦功能組場景":"沒存成("+r.status+")"}catch(x){$("eerr").textContent="連不到電腦"}}});
 async function load(){
  try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();const priv=await kget("priv"),pub=await kget("pub"),host=await kget("host"),token=await kget("token");
   if(priv&&pub&&host&&token){const raw=Uint8Array.from(atob(pub),c=>c.charCodeAt(0));S={priv,pub,host,token,kid:(await sha(raw)).slice(0,16)};$("pair").classList.add("hide");$("main").classList.remove("hide");return refresh()}
