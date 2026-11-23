@@ -53,7 +53,7 @@ async function signedFetch(method,path,bodyObj){
  return fetch(S.host+path,{method,headers:h,body:body||undefined,cache:"no-store"});
 }
 async function ntfyLast(topic){
- const r=await fetch("https://ntfy.sh/"+topic+"/json?poll=1&since=all",{cache:"no-store"});const t=(await r.text()).trim().split("\n").filter(Boolean);
+ let r;try{r=await fetch("https://ntfy.sh/"+topic+"/json?poll=1&since=all",{cache:"no-store"})}catch(e){throw new Error("連不到 ntfy.sh(定位服務):如果在學校/公司網路,可能被擋,請改用行動網路或家裡 WiFi 再試")}const t=(await r.text()).trim().split("\n").filter(Boolean);
  for(let i=t.length-1;i>=0;i--){try{const j=JSON.parse(t[i]);if(j.event==="message"&&j.message)return j.message.trim()}catch(e){}}return null}
 async function refreshHost(){
  const h=await ntfyLast("duetptr-"+(await sha(S.token+"|ptr")).slice(0,24));if(h&&/^https:\/\/[a-z0-9-]+\.trycloudflare\.com\/?$/.test(h.trim())&&h.replace(/\/+$/,"")!==S.host){S.host=h.replace(/\/+$/,"");await kset("host",S.host);return true}return false}
