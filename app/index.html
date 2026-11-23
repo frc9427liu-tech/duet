@@ -26,6 +26,7 @@ input[type=range]{width:100%}.row{display:flex;justify-content:space-between;ali
 </div>
 <div id="main" class="hide">
  <div class="row"><span class="mu" id="stat">連線中…</span><button class="sec" style="width:auto;padding:8px 14px" id="reload">重新整理</button></div>
+ <h2>電腦狀態</h2><div class="card" id="st">載入中…</div>
  <h2>場景</h2><div id="scenes" class="grid"></div>
  <div id="devs"></div>
  <h2>最近紀錄</h2><div class="card mu" id="log">載入中…</div>
@@ -98,6 +99,7 @@ async function refresh(){
    if(d.type==="dial"){const v=(d.state&&d.state.value)!=null?d.state.value:50;return '<div class="card'+off+'">'+nm+'<input type="range" min="'+Number(d.min||0)+'" max="'+Number(d.max||100)+'" value="'+Number(v)+'" data-dial="'+esc(d.id)+'"></div>'}
    if(d.type==="button")return '<div class="card'+off+'"><div class="row">'+nm+'<button style="width:auto" data-press="'+esc(d.id)+'">按一下</button></div></div>';
    return '<div class="card'+off+'"><div class="row">'+nm+'<span><button style="width:auto;margin-right:6px" data-on="'+esc(d.id)+'">開</button><button class="sec" style="width:auto" data-off="'+esc(d.id)+'">關</button></span></div></div>'}).join("")).join("");
+  try{const rt=await call("GET","home/status");if(rt.ok){const t=await rt.json();$("st").innerHTML="<b>"+esc(t.host)+"</b><br>CPU "+Number(t.cpu)+"% · 記憶體 "+Number(t.mem)+"%(共 "+Number(t.mem_gb)+" GB)"+(t.battery==null?" · 插電(桌機)":" · 電量 "+Number(t.battery)+"%"+(t.plugged?"(充電中)":""))}}catch(e){}
   try{const rl=await call("GET","home/log");if(rl.ok){const L=await rl.json();$("log").innerHTML=Array.isArray(L)&&L.length?L.slice(0,8).map(x=>esc(new Date((+x.t||0)*1000).toLocaleTimeString("zh-TW",{hour:"2-digit",minute:"2-digit"})+" "+(x.ok===false?"✗ ":"✓ ")+(x.what||""))).join("<br>"):"還沒有紀錄"}}catch(e){}
   $("stat").textContent="已連線 · "+new Date().toLocaleTimeString("zh-TW",{hour:"2-digit",minute:"2-digit"});
  }catch(e){$("stat").innerHTML='<span class="err">'+esc(e.message||"連不到電腦")+"(電腦要開機、Duet 要在跑)</span>"}}
