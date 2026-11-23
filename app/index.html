@@ -95,18 +95,19 @@ async function refresh(){
   if(rd.status===401||rd.status===403||rd.status===404){$("stat").innerHTML='<span class="err">配對失效:可能被電腦撤銷、電腦重設了,或手機時間不準(差 2 分鐘以上)。請到最下面「忘記這台電腦」後重新配對</span>';return}
   if(rd.status===429){$("stat").innerHTML='<span class="err">請求太頻繁被暫時擋住,請 10 分鐘後再試</span>';return}
   if(!rd.ok||!rs.ok){$("stat").innerHTML='<span class="err">電腦回應異常('+rd.status+'),請稍後重試</span>';return}
+  const pT=call("GET","home/timers").catch(()=>null),pS=call("GET","home/status").catch(()=>null),pL=call("GET","home/log").catch(()=>null);
   const devs=await rd.json(),sc=await rs.json();if(!Array.isArray(devs)||!Array.isArray(sc))throw new Error("電腦回應格式不對");
   $("scenes").innerHTML=sc.map(x=>'<button class="sec" data-sc="'+esc(x.id)+'">'+esc(x.name)+'</button>').join("")||'<span class="mu">還沒有場景</span>';
   $("tsc").innerHTML=sc.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.name)+'</option>').join("");
-  try{const rt2=await call("GET","home/timers");if(rt2.ok){const T=await rt2.json();$("tlist").innerHTML=Array.isArray(T)&&T.length?T.map(x=>esc(x.name)+" · 剩 "+Math.ceil(Number(x.left)/60)+" 分 <a href='#' data-tc='"+esc(x.id)+"'>取消</a>").join("<br>"):"沒有進行中的計時器"}}catch(e){}
+  try{const rt2=await pT;if(rt2&&rt2.ok){const T=await rt2.json();$("tlist").innerHTML=Array.isArray(T)&&T.length?T.map(x=>esc(x.name)+" · 剩 "+Math.ceil(Number(x.left)/60)+" 分 <a href='#' data-tc='"+esc(x.id)+"'>取消</a>").join("<br>"):"沒有進行中的計時器"}}catch(e){}
   const rooms={};devs.forEach(d=>{const k=d.room||"我的裝置";(rooms[k]=rooms[k]||[]).push(d)});
   $("devs").innerHTML=Object.entries(rooms).map(([room,L])=>"<h2>"+esc(room)+"</h2>"+L.map(d=>{
    const off=d.online===false?" off":"",nm="<b>"+esc(d.name)+"</b>"+(d.online===false?' <span class="mu">離線</span>':"");
    if(d.type==="dial"){const v=(d.state&&d.state.value)!=null?d.state.value:50;return '<div class="card'+off+'">'+nm+'<input type="range" min="'+Number(d.min||0)+'" max="'+Number(d.max||100)+'" value="'+Number(v)+'" data-dial="'+esc(d.id)+'"></div>'}
    if(d.type==="button")return '<div class="card'+off+'"><div class="row">'+nm+'<button style="width:auto" data-press="'+esc(d.id)+'">按一下</button></div></div>';
    return '<div class="card'+off+'"><div class="row">'+nm+'<span><button style="width:auto;margin-right:6px" data-on="'+esc(d.id)+'">開</button><button class="sec" style="width:auto" data-off="'+esc(d.id)+'">關</button></span></div></div>'}).join("")).join("");
-  try{const rt=await call("GET","home/status");if(rt.ok){const t=await rt.json();$("st").innerHTML="<b>"+esc(t.host)+"</b><br>CPU "+Number(t.cpu)+"% · 記憶體 "+Number(t.mem)+"%(共 "+Number(t.mem_gb)+" GB)"+(t.battery==null?" · 插電(桌機)":" · 電量 "+Number(t.battery)+"%"+(t.plugged?"(充電中)":""))}}catch(e){}
-  try{const rl=await call("GET","home/log");if(rl.ok){const L=await rl.json();$("log").innerHTML=Array.isArray(L)&&L.length?L.slice(0,8).map(x=>esc(new Date((+x.t||0)*1000).toLocaleTimeString("zh-TW",{hour:"2-digit",minute:"2-digit"})+" "+(x.ok===false?"✗ ":"✓ ")+(x.what||""))).join("<br>"):"還沒有紀錄"}}catch(e){}
+  try{const rt=await pS;if(rt&&rt.ok){const t=await rt.json();$("st").innerHTML="<b>"+esc(t.host)+"</b><br>CPU "+Number(t.cpu)+"% · 記憶體 "+Number(t.mem)+"%(共 "+Number(t.mem_gb)+" GB)"+(t.battery==null?" · 插電(桌機)":" · 電量 "+Number(t.battery)+"%"+(t.plugged?"(充電中)":""))}}catch(e){}
+  try{const rl=await pL;if(rl&&rl.ok){const L=await rl.json();$("log").innerHTML=Array.isArray(L)&&L.length?L.slice(0,8).map(x=>esc(new Date((+x.t||0)*1000).toLocaleTimeString("zh-TW",{hour:"2-digit",minute:"2-digit"})+" "+(x.ok===false?"✗ ":"✓ ")+(x.what||""))).join("<br>"):"還沒有紀錄"}}catch(e){}
   $("stat").textContent="已連線 · "+new Date().toLocaleTimeString("zh-TW",{hour:"2-digit",minute:"2-digit"});
  }catch(e){$("stat").innerHTML='<span class="err">'+esc(e.message||"連不到電腦")+"(電腦要開機、Duet 要在跑)</span>"}}
 async function act(id,cmd,value){try{const r=await call("POST","home/act",{id,cmd,value});$("stat").textContent=r.ok?"已送出":(r.status===404?"找不到這個裝置":r.status===502?"裝置離線":r.status===401||r.status===403?"沒有權限或配對失效":"失敗("+r.status+")")}catch(e){$("stat").textContent="連不到電腦"}}
