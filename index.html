@@ -269,7 +269,7 @@ footer a{display:block;padding:4px 0}footer a:hover{color:var(--ink);text-decora
     <h1>手機和電腦,<br>連成一個生活</h1>
     <div class="acts">
       <a class="btn lg" href="#download"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z"/></svg>下載 Duet</a>
-      <span class="meta" id="plat">適用於 Windows 10/11 · iPhone · Android</span>
+      <span class="meta" id="plat">電腦:Windows 10/11 · 手機:iPhone(Android 測試中)· 全部設定約 30 分鐘</span>
       <a class="lnk" href="#sync">看它怎麼用 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M7 7h10v10h-2V10.4L6.4 19 5 17.6 13.6 9H7z"/></svg></a>
     </div>
     <p class="terms">學生專題 · 公開測試中 · 免註冊帳號。連線走你自己的電腦,檔案不經過我們的伺服器。</p>
@@ -428,8 +428,9 @@ footer a{display:block;padding:4px 0}footer a:hover{color:var(--ink);text-decora
 <section class="s" id="download"><div class="wrap">
   <h2 class="h2">下載 Duet</h2>
   <p class="lead2">電腦端裝在你的電腦,手機端裝在你的手機,兩邊搭配使用。</p>
+  <div style="background:rgba(127,127,127,.12);border-radius:14px;padding:16px 18px;margin:0 0 22px;line-height:1.7"><b>3 步上手(第一次約 30 分鐘,之後免費):</b><br>① 電腦下載「Windows 電腦端」→ 雙擊 → 看到 8 位數配對碼(約 2 分鐘)<br>② iPhone 照下面的教學裝 SideStore,再裝 Duet(約 20 分鐘,最花時間)<br>③ 手機 Duet「設定」→「用配對碼連接」輸入配對碼 → 完成。想控制藍牙喇叭:首頁左上「小助手」會一步步帶你。<br><span style="opacity:.75">只想先試試?先做 ① 就能看到電腦端長怎樣。注意:藍牙「第一次配對」要坐在電腦前做一次,之後才能手機遙控。</span></div>
   <div class="dl" id="dl">
-    <div class="dc"><span class="tag ok">v0 測試版</span><h3>Windows 電腦端</h3><p>下載後雙擊,會自動完成設定並顯示 8 位數配對碼;到手機 Duet「設定」→「用配對碼連接」輸入即可。免安裝 Python。</p><a class="btn" href="https://github.com/frc9427liu-tech/duet-dist-7k3q/releases/download/desktop-v0/DuetCore.exe">下載 Windows 電腦端</a><span class="hint">尚未簽章,Windows 會跳「未知發行者」:點「其他資訊」→「仍要執行」。</span></div>
+    <div class="dc"><span class="tag ok">v0 測試版</span><h3>Windows 電腦端</h3><p>下載後雙擊,會自動完成設定並顯示 8 位數配對碼;到手機 Duet「設定」→「用配對碼連接」輸入即可。免安裝 Python。<br><b>它會做的事:</b>常駐在背景、開機自動啟動、建立一條加密連線讓手機連回來;配對碼 10 分鐘有效。要關閉:工作管理員結束 DuetCore.exe,並刪除 %APPDATA%\Duet 資料夾與「啟動」項目。</p><a class="btn" href="https://github.com/frc9427liu-tech/duet-dist-7k3q/releases/download/desktop-v0/DuetCore.exe">下載 Windows 電腦端</a><span class="hint">尚未簽章,Windows 會跳「未知發行者」:點「其他資訊」→「仍要執行」。</span></div>
     <div class="dc"><span class="tag ok">v6.8.1 可用</span><h3>iPhone</h3><p>透過 SideStore 加入 Duet 來源安裝,不需要上架 App Store。需要 SideStore 與 Apple ID。</p><div class="acts2"><a class="btn" href="sidestore://source?url=https://raw.githubusercontent.com/frc9427liu-tech/duet-dist-7k3q/main/source.json">用 SideStore 開啟</a><button class="btn soft" id="cpsrc" type="button">複製來源網址</button></div><a class="hint" href="#ios-guide" onclick="document.querySelector('#ios-guide details').open=true">第一次用?看完整安裝教學 ↓</a><span class="hint" id="cphint">在 SideStore → 來源 → + 貼上網址;按鈕在 iPhone 上才會直接開啟。</span></div>
     <div class="dc"><span class="tag soon">測試版</span><h3>Android</h3><p>目前提供傳檔與傳文字,日曆與剪貼簿規劃中。APK 測試版僅開放給受邀測試者。</p><a class="btn off">受邀測試</a></div>
   </div>
@@ -438,7 +439,7 @@ footer a{display:block;padding:4px 0}footer a:hover{color:var(--ink);text-decora
     <details><summary>iPhone 安裝教學(從零開始,第一次約 20~30 分鐘;之後免費、不用付費開發者帳號)</summary>
       <p><b>先確認:</b>iPhone 有設鎖屏密碼、系統 iOS 15 以上;一台 64 位元 Windows 電腦(Windows 10 on ARM、32 位元不支援);一條傳輸線;一組 Apple ID(免費,建議另開一個專用的);安裝時手機要連 WiFi(行動網路不行)。</p>
       <p><b>為什麼這麼麻煩?</b>Apple 不讓 iPhone 直接裝 App Store 以外的 App。SideStore 是用你自己的免費 Apple ID 幫 App 簽章的工具,只有「第一次」要用電腦裝,之後都在手機上完成。</p>
-      <p><b>A. 手機先準備(2 分鐘)</b><br>1) 在 App Store 搜尋並安裝「LocalDevVPN」。<br>2) 打開 LocalDevVPN,點「Connect」,出現「允許加入 VPN 設定」時按「允許」並輸入手機密碼。(之後每次要安裝或續簽 App 時,都要先打開它並連線。)</p>
+      <p><b>A. 手機先準備(2 分鐘)</b><br>(LocalDevVPN 只是在手機內部繞一圈、讓 SideStore 能自我續簽的工具,不是真的 VPN,不會經過別人的伺服器,流量不出手機。)<br>1) 在 App Store 搜尋並安裝「LocalDevVPN」。<br>2) 打開 LocalDevVPN,點「Connect」,出現「允許加入 VPN 設定」時按「允許」並輸入手機密碼。(之後每次要安裝或續簽 App 時,都要先打開它並連線。)</p>
       <p><b>B. 電腦準備(5~10 分鐘)</b><br>1) 安裝 iTunes(從 Microsoft Store 或 Apple 官網下載;沒有它電腦認不到 iPhone)。<br>2) 下載並安裝 iloader:<a href="https://github.com/nab138/iloader/releases/latest/download/iloader-windows-x64.msi">iloader 安裝檔(.msi)</a>。</p>
       <p><b>C. 把 SideStore 裝到手機(5 分鐘)</b><br>1) 用傳輸線接上電腦和 iPhone,手機跳出「信任這台電腦?」按「信任」並輸入密碼。<br>2) 打開 iloader → 用 Apple ID 登入(注意大小寫)→ 選你的 iPhone → 點「Install SideStore (Stable)」。<br>3) 等它跑完,手機桌面會出現 SideStore。</p>
       <p><b>D. 在手機上信任並啟動 SideStore(3 分鐘)</b><br>1) 手機「設定 → 一般 → VPN 與裝置管理」→ 在「開發者 App」下點你的 Apple ID → 「信任」。<br>2) iOS 16 以上:到「設定 → 隱私權與安全性」最下面打開「開發者模式」,手機會重新開機,開機後再按「開啟」。<br>3) 打開 LocalDevVPN → Connect。<br>4) 打開 SideStore,用同一組 Apple ID 登入。<br>5) 點下方「My Apps」,點 SideStore 右邊寫著「7 DAYS」的按鈕,讓它自己續簽一次完成設定;跳出「撤銷或建立新憑證」時按「Yes / Refresh Now」。</p>
@@ -450,7 +451,7 @@ footer a{display:block;padding:4px 0}footer a:hover{color:var(--ink);text-decora
   </div>
   <div class="take">
     <div><h2>專屬工具,隨身帶著走</h2><p>在手機安裝 Duet,連上你的電腦,隨時隨地傳檔、遙控。</p><a class="btn lg" href="#dl">下載 Duet</a></div>
-    <div class="qr">QR 碼<br>網站上線後產生</div>
+    <div class="qr" style="font-size:13px;padding:14px">用手機直接開<br>本頁網址<br>往下看「iPhone 安裝教學」</div>
   </div>
 </div></section>
 </main>
