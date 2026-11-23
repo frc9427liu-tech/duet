@@ -28,6 +28,10 @@ input[type=range]{width:100%}.row{display:flex;justify-content:space-between;ali
  <div class="row"><span class="mu" id="stat">連線中…</span><button class="sec" style="width:auto;padding:8px 14px" id="reload">重新整理</button></div>
  <h2>電腦狀態</h2><div class="card" id="st">載入中…</div>
  <h2>場景</h2><div id="scenes" class="grid"></div>
+ <h2>計時器(幾分鐘後執行場景)</h2>
+ <div class="card"><select id="tsc" style="font:inherit;width:100%;padding:10px;border-radius:10px"></select>
+  <div class="grid" style="grid-template-columns:repeat(3,1fr);margin-top:10px"><button class="sec" data-tm="15">15 分</button><button class="sec" data-tm="30">30 分</button><button class="sec" data-tm="60">60 分</button></div>
+  <div id="tlist" class="mu" style="margin-top:10px"></div></div>
  <div id="devs"></div>
  <h2>最近紀錄</h2><div class="card mu" id="log">載入中…</div>
  <h2>設定</h2><div class="card"><button class="sec" id="unpair">忘記這台電腦(只清除這支手機的配對)</button>
@@ -93,6 +97,8 @@ async function refresh(){
   if(!rd.ok||!rs.ok){$("stat").innerHTML='<span class="err">電腦回應異常('+rd.status+'),請稍後重試</span>';return}
   const devs=await rd.json(),sc=await rs.json();if(!Array.isArray(devs)||!Array.isArray(sc))throw new Error("電腦回應格式不對");
   $("scenes").innerHTML=sc.map(x=>'<button class="sec" data-sc="'+esc(x.id)+'">'+esc(x.name)+'</button>').join("")||'<span class="mu">還沒有場景</span>';
+  $("tsc").innerHTML=sc.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.name)+'</option>').join("");
+  try{const rt2=await call("GET","home/timers");if(rt2.ok){const T=await rt2.json();$("tlist").innerHTML=Array.isArray(T)&&T.length?T.map(x=>esc(x.name)+" · 剩 "+Math.ceil(Number(x.left)/60)+" 分 <a href='#' data-tc='"+esc(x.id)+"'>取消</a>").join("<br>"):"沒有進行中的計時器"}}catch(e){}
   const rooms={};devs.forEach(d=>{const k=d.room||"我的裝置";(rooms[k]=rooms[k]||[]).push(d)});
   $("devs").innerHTML=Object.entries(rooms).map(([room,L])=>"<h2>"+esc(room)+"</h2>"+L.map(d=>{
    const off=d.online===false?" off":"",nm="<b>"+esc(d.name)+"</b>"+(d.online===false?' <span class="mu">離線</span>':"");
@@ -106,6 +112,8 @@ async function refresh(){
 async function act(id,cmd,value){try{const r=await call("POST","home/act",{id,cmd,value});$("stat").textContent=r.ok?"已送出":(r.status===404?"找不到這個裝置":r.status===502?"裝置離線":r.status===401||r.status===403?"沒有權限或配對失效":"失敗("+r.status+")")}catch(e){$("stat").textContent="連不到電腦"}}
 document.addEventListener("click",async e=>{const t=e.target;
  if(t.dataset.sc){try{const r=await call("POST","home/scene",{id:t.dataset.sc});$("stat").textContent=r.ok?"場景已執行":"場景失敗("+r.status+")"}catch(x){$("stat").textContent="連不到電腦"}}
+ else if(t.dataset.tm){try{const r=await call("POST","home/timer",{scene:$("tsc").value,minutes:+t.dataset.tm});$("stat").textContent=r.ok?"計時器已設定":"設定失敗("+r.status+")";refresh()}catch(x){$("stat").textContent="連不到電腦"}}
+ else if(t.dataset.tc){e.preventDefault();try{await call("POST","home/timer",{cancel:t.dataset.tc});refresh()}catch(x){}}
  else if(t.dataset.press)act(t.dataset.press,"press");else if(t.dataset.on)act(t.dataset.on,"on");else if(t.dataset.off)act(t.dataset.off,"off")});
 let dt=null;document.addEventListener("input",e=>{const t=e.target;if(t.dataset&&t.dataset.dial){clearTimeout(dt);dt=setTimeout(()=>act(t.dataset.dial,"set",+t.value),350)}});
 async function load(){
