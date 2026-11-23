@@ -22,7 +22,7 @@ input[type=range]{width:100%}.row{display:flex;justify-content:space-between;ali
   <p class="mu">① 電腦先裝並開啟 Duet 電腦端(官網下載,雙擊)<br>② 電腦螢幕會顯示 8 位數「配對碼」<br>③ 在下面輸入它</p>
   <input id="code" type="tel" inputmode="numeric" maxlength="9" placeholder="0000 0000" autocomplete="off">
   <p style="margin:12px 0 0"><button id="goPair">連接</button></p><div id="perr" class="err"></div></div>
- <p class="mu">第一次用?<a href="../guide.html">看圖文教學</a>。這個網頁版不用裝 App,只能遙控:音量、亮度、靜音、鎖定、智慧家與場景。傳檔、日曆等完整功能請用 iPhone App。</p>
+ <p class="mu"><b>iPhone 建議先「分享 → 加入主畫面」,再從主畫面的 Duet 圖示打開、在那裡配對</b>(否則 Safari 一週沒開,配對可能被系統清掉)。<br>第一次用?<a href="../guide.html">看圖文教學</a>。這個網頁版不用裝 App,只能遙控:音量、亮度、靜音、鎖定、智慧家與場景。傳檔、日曆等完整功能請用 iPhone App。</p>
 </div>
 <div id="main" class="hide">
  <div class="row"><span class="mu" id="stat">連線中…</span><button class="sec" style="width:auto;padding:8px 14px" id="reload">重新整理</button></div>
@@ -38,7 +38,7 @@ const hex=b=>[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join(
 const b64=b=>btoa(String.fromCharCode(...new Uint8Array(b)));
 const enc=s=>new TextEncoder().encode(s);
 async function sha(s){return hex(await crypto.subtle.digest("SHA-256",typeof s==="string"?enc(s):s))}
-const DB=()=>new Promise((ok,no)=>{const r=indexedDB.open("duet",1);r.onupgradeneeded=()=>r.result.createObjectStore("k");r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)});
+let _db=null;const DB=()=>_db||(_db=new Promise((ok,no)=>{const r=indexedDB.open("duet",1);r.onupgradeneeded=()=>r.result.createObjectStore("k");r.onsuccess=()=>ok(r.result);r.onerror=()=>{_db=null;no(r.error)}}));
 async function kget(k){const d=await DB();return new Promise(ok=>{const q=d.transaction("k").objectStore("k").get(k);q.onsuccess=()=>ok(q.result);q.onerror=()=>ok(null)})}
 async function kset(k,v){const d=await DB();return new Promise((ok,no)=>{const t=d.transaction("k","readwrite");t.objectStore("k").put(v,k);t.oncomplete=ok;t.onerror=()=>no(t.error)})}
 async function kclear(){const d=await DB();return new Promise(ok=>{const t=d.transaction("k","readwrite");t.objectStore("k").clear();t.oncomplete=ok})}
@@ -53,10 +53,10 @@ async function signedFetch(method,path,bodyObj){
  return fetch(S.host+path,{method,headers:h,body:body||undefined,cache:"no-store"});
 }
 async function ntfyLast(topic){
- const r=await fetch("https://ntfy.sh/"+topic+"/json?poll=1&since=12h",{cache:"no-store"});const t=(await r.text()).trim().split("\n").filter(Boolean);
+ const r=await fetch("https://ntfy.sh/"+topic+"/json?poll=1&since=all",{cache:"no-store"});const t=(await r.text()).trim().split("\n").filter(Boolean);
  for(let i=t.length-1;i>=0;i--){try{const j=JSON.parse(t[i]);if(j.event==="message"&&j.message)return j.message.trim()}catch(e){}}return null}
 async function refreshHost(){
- const h=await ntfyLast("duetptr-"+(await sha(S.token+"|ptr")).slice(0,24));if(h&&h.replace(/\/+$/,"")!==S.host){S.host=h.replace(/\/+$/,"");await kset("host",S.host);return true}return false}
+ const h=await ntfyLast("duetptr-"+(await sha(S.token+"|ptr")).slice(0,24));if(h&&/^https:\/\/[a-z0-9-]+\.trycloudflare\.com\/?$/.test(h.trim())&&h.replace(/\/+$/,"")!==S.host){S.host=h.replace(/\/+$/,"");await kset("host",S.host);return true}return false}
 async function call(method,page,bodyObj){
  const path="/"+S.token+"/"+page;
  try{return await signedFetch(method,path,bodyObj)}catch(e){}
@@ -71,43 +71,47 @@ async function doPair(){
   if(!host)throw new Error("找不到這組配對碼:請確認電腦上的 Duet 在跑、碼沒過期(10 分鐘),再輸入一次");
   const kp=await crypto.subtle.generateKey({name:"ECDSA",namedCurve:"P-256"},false,["sign","verify"]);
   const pubRaw=new Uint8Array(await crypto.subtle.exportKey("raw",kp.publicKey));
-  const base=host.replace(/\/+$/,"");
-  const r=await fetch(base+"/_pair",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({code,pub:b64(pubRaw),name:"網頁版 "+(navigator.platform||"手機").slice(0,20)})});
+  const base=host.replace(/\/+$/,"");if(!/^https:\/\/[a-z0-9-]+\.trycloudflare\.com$/.test(base))throw new Error("取得的電腦位置格式不對,請重開電腦端再試");
+  const r=await fetch(base+"/_pair",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({web:true,code,pub:b64(pubRaw),name:"網頁版 "+(navigator.platform||"手機").slice(0,20)})});
   const t=await r.text();
+  if(r.status===429)throw new Error("嘗試太多次,請等 10 分鐘再試");
   if(r.status===403)throw new Error("配對碼錯誤或已過期,請看電腦螢幕上最新的碼");
   if(!t.startsWith("ok:"))throw new Error("配對失敗("+r.status+")");
   await kset("priv",kp.privateKey);await kset("pub",b64(pubRaw));await kset("host",base);await kset("token",t.slice(3));
   await load();
  }catch(e){$("perr").textContent=e.message||String(e)}
- $("goPair").disabled=false;$("goPair").textContent="連接"}
+ $("goPair").disabled=false;$("goPair").textContent="連接";if($("perr").textContent)$("code").value=""}
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
 async function refresh(){
  $("stat").textContent="更新中…";
  try{
   const [rd,rs]=await Promise.all([call("GET","home/devices"),call("GET","home/scenes")]);
-  if(rd.status===401){$("stat").innerHTML='<span class="err">這支手機已被電腦撤銷或電腦已重設,請「忘記這台電腦」後重新配對</span>';return}
-  const devs=await rd.json(),sc=await rs.json();
+  if(rd.status===401||rd.status===403||rd.status===404){$("stat").innerHTML='<span class="err">配對失效:可能被電腦撤銷、電腦重設了,或手機時間不準(差 2 分鐘以上)。請到最下面「忘記這台電腦」後重新配對</span>';return}
+  if(rd.status===429){$("stat").innerHTML='<span class="err">請求太頻繁被暫時擋住,請 10 分鐘後再試</span>';return}
+  if(!rd.ok||!rs.ok){$("stat").innerHTML='<span class="err">電腦回應異常('+rd.status+'),請稍後重試</span>';return}
+  const devs=await rd.json(),sc=await rs.json();if(!Array.isArray(devs)||!Array.isArray(sc))throw new Error("電腦回應格式不對");
   $("scenes").innerHTML=sc.map(x=>'<button class="sec" data-sc="'+esc(x.id)+'">'+esc(x.name)+'</button>').join("")||'<span class="mu">還沒有場景</span>';
-  const rooms={};devs.forEach(d=>(rooms[d.room]=rooms[d.room]||[]).push(d));
+  const rooms={};devs.forEach(d=>{const k=d.room||"我的裝置";(rooms[k]=rooms[k]||[]).push(d)});
   $("devs").innerHTML=Object.entries(rooms).map(([room,L])=>"<h2>"+esc(room)+"</h2>"+L.map(d=>{
    const off=d.online===false?" off":"",nm="<b>"+esc(d.name)+"</b>"+(d.online===false?' <span class="mu">離線</span>':"");
-   if(d.type==="dial"){const v=(d.state&&d.state.value)!=null?d.state.value:50;return '<div class="card'+off+'">'+nm+'<input type="range" min="'+(d.min||0)+'" max="'+(d.max||100)+'" value="'+v+'" data-dial="'+esc(d.id)+'"></div>'}
+   if(d.type==="dial"){const v=(d.state&&d.state.value)!=null?d.state.value:50;return '<div class="card'+off+'">'+nm+'<input type="range" min="'+Number(d.min||0)+'" max="'+Number(d.max||100)+'" value="'+Number(v)+'" data-dial="'+esc(d.id)+'"></div>'}
    if(d.type==="button")return '<div class="card'+off+'"><div class="row">'+nm+'<button style="width:auto" data-press="'+esc(d.id)+'">按一下</button></div></div>';
    return '<div class="card'+off+'"><div class="row">'+nm+'<span><button style="width:auto;margin-right:6px" data-on="'+esc(d.id)+'">開</button><button class="sec" style="width:auto" data-off="'+esc(d.id)+'">關</button></span></div></div>'}).join("")).join("");
   $("stat").textContent="已連線 · "+new Date().toLocaleTimeString("zh-TW",{hour:"2-digit",minute:"2-digit"});
  }catch(e){$("stat").innerHTML='<span class="err">'+esc(e.message||"連不到電腦")+"(電腦要開機、Duet 要在跑)</span>"}}
-async function act(id,cmd,value){try{const r=await call("POST","home/act",{id,cmd,value});$("stat").textContent=r.ok?"已送出":"失敗:"+await r.text()}catch(e){$("stat").textContent="連不到電腦"}}
+async function act(id,cmd,value){try{const r=await call("POST","home/act",{id,cmd,value});$("stat").textContent=r.ok?"已送出":(r.status===404?"找不到這個裝置":r.status===502?"裝置離線":r.status===401||r.status===403?"沒有權限或配對失效":"失敗("+r.status+")")}catch(e){$("stat").textContent="連不到電腦"}}
 document.addEventListener("click",async e=>{const t=e.target;
- if(t.dataset.sc){try{const r=await call("POST","home/scene",{id:t.dataset.sc});$("stat").textContent=r.ok?"場景已執行":"失敗:"+await r.text()}catch(x){$("stat").textContent="連不到電腦"}}
+ if(t.dataset.sc){try{const r=await call("POST","home/scene",{id:t.dataset.sc});$("stat").textContent=r.ok?"場景已執行":"場景失敗("+r.status+")"}catch(x){$("stat").textContent="連不到電腦"}}
  else if(t.dataset.press)act(t.dataset.press,"press");else if(t.dataset.on)act(t.dataset.on,"on");else if(t.dataset.off)act(t.dataset.off,"off")});
 let dt=null;document.addEventListener("input",e=>{const t=e.target;if(t.dataset&&t.dataset.dial){clearTimeout(dt);dt=setTimeout(()=>act(t.dataset.dial,"set",+t.value),350)}});
 async function load(){
- try{const priv=await kget("priv"),pub=await kget("pub"),host=await kget("host"),token=await kget("token");
+ try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();const priv=await kget("priv"),pub=await kget("pub"),host=await kget("host"),token=await kget("token");
   if(priv&&pub&&host&&token){const raw=Uint8Array.from(atob(pub),c=>c.charCodeAt(0));S={priv,pub,host,token,kid:(await sha(raw)).slice(0,16)};$("pair").classList.add("hide");$("main").classList.remove("hide");return refresh()}
- }catch(e){}
+ }catch(e){$("perr").textContent="這個瀏覽器無法儲存配對(私密瀏覽?),請改用一般視窗"}
  $("main").classList.add("hide");$("pair").classList.remove("hide")}
 $("goPair").onclick=doPair;$("reload").onclick=refresh;
 $("unpair").onclick=async()=>{if(confirm("只清除這支手機上的配對,確定?")){await kclear();S=null;load()}};
 $("code").addEventListener("input",e=>{let v=e.target.value.replace(/\D/g,"").slice(0,8);e.target.value=v.length>4?v.slice(0,4)+" "+v.slice(4):v});
+document.addEventListener("visibilitychange",()=>{if(!document.hidden&&S)refresh()});
 if(!window.crypto||!crypto.subtle)document.body.innerHTML="<p>這個瀏覽器不支援加密功能,請改用 Safari 或 Chrome 並用 https 開啟。</p>";else load();
 </script></body></html>
