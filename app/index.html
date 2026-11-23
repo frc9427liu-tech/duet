@@ -87,7 +87,7 @@ async function doPair(){
   await load();
  }catch(e){$("perr").textContent=e.message||String(e)}
  $("goPair").disabled=false;$("goPair").textContent="連接";if($("perr").textContent)$("code").value=""}
-function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 async function refresh(){
  $("stat").textContent="更新中…";
  try{
