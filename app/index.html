@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="zh-Hant"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0066cc">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0066cc"><meta name="color-scheme" content="light dark"><meta name="apple-mobile-web-app-title" content="Duet">
 <link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="icon-192.png"><title>Duet 網頁版</title>
 <style>
 :root{--bg:#f5f5f7;--card:#fff;--tx:#1d1d1f;--mu:#6e6e73;--ac:#0066cc;--lk:#0066cc;--bad:#d70015}
@@ -36,7 +36,7 @@ input[type=range]{width:100%}.row{display:flex;justify-content:space-between;ali
   <div id="tlist" class="mu" style="margin-top:10px"></div></div>
  <div id="devs"><p class="mu">載入中…</p></div>
  <h2>最近紀錄</h2><div class="card mu" id="log">載入中…</div>
- <h2>設定</h2><div class="card"><button class="sec" id="unpair">忘記這台電腦(只清除這支手機的配對)</button>
+ <h2>設定</h2><div class="card"><button class="sec" id="unpair">解除這支手機與電腦的連接(只清除這支手機)</button>
  <p class="mu">要完全撤銷:電腦配對頁 →「管理已配對的手機」。</p></div>
 </div>
 <script>
@@ -80,14 +80,14 @@ async function doPair(){
   const kp=await crypto.subtle.generateKey({name:"ECDSA",namedCurve:"P-256"},false,["sign","verify"]);
   const pubRaw=new Uint8Array(await crypto.subtle.exportKey("raw",kp.publicKey));
   const base=host.replace(/\/+$/,"");if(!/^https:\/\/[a-z0-9-]+\.trycloudflare\.com$/.test(base))throw new Error("取得的電腦位置格式不對,請重開電腦端再試");
-  const r=await fetch(base+"/_pair",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({web:true,code,pub:b64(pubRaw),name:"網頁版 "+(navigator.platform||"手機").slice(0,20)})});
+  const r=await fetch(base+"/_pair",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({web:true,code,pub:b64(pubRaw),name:"網頁版("+(/Android/i.test(navigator.userAgent)?"Android 手機":/iPhone|iPad/i.test(navigator.userAgent)?"iPhone/iPad":/Windows/i.test(navigator.userAgent)?"Windows 電腦":/Mac/i.test(navigator.userAgent)?"Mac":"其他裝置")+")"})});
   const t=await r.text();
   if(r.status===429)throw new Error("嘗試太多次,請等 10 分鐘再試");
   if(r.status===403)throw new Error("配對碼錯誤或已過期,請看電腦螢幕上最新的碼");
-  if(!t.startsWith("ok:"))console.warn("pair status",r.status);throw new Error("配對沒成功,請確認電腦上的 Duet 在跑,再試一次");
+  if(!t.startsWith("ok:")){console.warn("pair status",r.status);throw new Error("配對沒成功,請確認電腦上的 Duet 在跑,再試一次")}
   await kset("priv",kp.privateKey);await kset("pub",b64(pubRaw));await kset("host",base);await kset("token",t.slice(3));
   await load();
- }catch(e){const m=friendly(e);$("perr").textContent=/Failed to fetch|NetworkError|Load failed/i.test(m)?"連不到電腦,請確認電腦開機、Duet 在跑、手機有網路":m;if(/Failed to fetch|NetworkError|Load failed/i.test(m))keepCode=true}
+ }catch(e){const raw=(e&&e.message)||String(e),m=friendly(e);$("perr").textContent=/Failed to fetch|NetworkError|Load failed/i.test(raw)?"連不到電腦,請確認電腦開機、Duet 在跑、手機有網路":m;if(/Failed to fetch|NetworkError|Load failed/i.test(raw))keepCode=true}
  $("goPair").disabled=false;$("goPair").textContent="連接";if($("perr").textContent&&!keepCode)$("code").value="";keepCode=false}
 let keepCode=false;
 function failLoad(){if($("st").textContent==="載入中…")$("st").textContent="載入失敗,請按上方「重新整理」重試";if($("log").textContent==="載入中…")$("log").textContent="載入失敗"}
@@ -99,7 +99,7 @@ async function refresh(){
   const [rd,rs]=await Promise.all([call("GET","home/devices"),call("GET","home/scenes")]);
   if(rd.status===401||rd.status===403||rd.status===404){$("stat").innerHTML='<span class="err">配對失效:可能被電腦撤銷、電腦重設了,或手機時間不準(差 2 分鐘以上)。請到最下面「忘記這台電腦」後重新配對</span>';failLoad();return}
   if(rd.status===429){$("stat").innerHTML='<span class="err">請求太頻繁被暫時擋住,請 10 分鐘後再試</span>';failLoad();return}
-  if(!rd.ok||!rs.ok){$("stat").innerHTML='<span class="err">電腦回應異常('+rd.status+'),請稍後重試</span>';failLoad();return}
+  if(!rd.ok||!rs.ok){$("stat").innerHTML='<span class="err">電腦暫時沒回應,請稍後重試</span>';failLoad();return}
   const pT=call("GET","home/timers").catch(()=>null),pS=call("GET","home/status").catch(()=>null),pL=call("GET","home/log").catch(()=>null);
   const devs=await rd.json(),sc=await rs.json();if(!Array.isArray(devs)||!Array.isArray(sc))throw new Error("電腦回應格式不對");
   $("scenes").innerHTML=sc.map(x=>'<button class="sec" data-sc="'+esc(x.id)+'">'+esc(x.name)+'</button>').join("")||'<span class="mu">還沒有場景,往下到「我的場景」按「新增場景」建立第一個</span>';
