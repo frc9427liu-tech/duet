@@ -1,0 +1,98 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Duet 適合誰?選一個最像你的人</title>
+<meta name="description" content="學生、上班族、主婦、家長、長輩、創作者、在家工作者:看看 Duet 在你的一天裡能幫什麼忙,以及需要準備什麼。">
+<style>:root{--bg:#f5f5f7;--c:#fff;--t:#1d1d1f;--m:#6e6e73;--a:#0a84ff;--ok:#1d9b4b;--warn:#b26a00;--line:#0000001a}@media(prefers-color-scheme:dark){:root{--bg:#000;--c:#1c1c1e;--t:#f5f5f7;--m:#98989d;--line:#ffffff24;--ok:#30d158;--warn:#ffb340}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:16px/1.65 -apple-system,"Segoe UI","Microsoft JhengHei",sans-serif;padding:20px 18px 60px;max-width:780px;margin:auto}
+a{color:var(--a)}h1{font-size:28px;margin:10px 0 6px;letter-spacing:-.5px}.lead{color:var(--m);margin:0 0 18px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 18px}.chip{border:0;border-radius:999px;padding:10px 16px;background:var(--c);color:var(--t);font:600 15px inherit;cursor:pointer;box-shadow:0 0 0 1px var(--line);min-height:44px}.chip[aria-pressed=true]{background:var(--a);color:#fff;box-shadow:none}.chip:focus-visible{outline:3px solid var(--a);outline-offset:2px}
+.hero{background:var(--c);border-radius:18px;padding:18px 20px;margin-bottom:14px}.hero h2{margin:0 0 4px;font-size:22px}.hero p{margin:0;color:var(--m)}
+.step{display:flex;gap:14px;background:var(--c);border-radius:16px;padding:14px 18px;margin:10px 0}.time{flex:none;width:64px;font-weight:700;color:var(--a);font-variant-numeric:tabular-nums}.step b{display:block}.step p{margin:2px 0 6px;color:var(--m);font-size:15px}
+.tag{display:inline-block;font-size:12px;padding:1px 9px;border-radius:99px;background:rgba(10,132,255,.14);color:var(--a);margin:0 6px 0 0}.tag.pc{background:rgba(29,155,75,.15);color:var(--ok)}.tag.opt{background:rgba(178,106,0,.15);color:var(--warn)}
+.need,.note{border-radius:16px;padding:14px 18px;margin:12px 0;font-size:15px}.need{background:var(--c)}.note{background:rgba(178,106,0,.12);color:var(--t)}.need b,.note b{display:block;margin-bottom:2px}
+.cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.cta a{padding:12px 18px;border-radius:12px;background:var(--a);color:#fff;text-decoration:none;font-weight:600}.cta a.alt{background:var(--c);color:var(--a);box-shadow:0 0 0 1px var(--line)}
+.m{color:var(--m);font-size:13px}
+@media(max-width:520px){.step{flex-direction:column;gap:2px}.time{width:auto}}
+</style></head><body>
+<p><a href="./">← Duet 首頁</a></p>
+<h1>Duet 適合誰?</h1>
+<p class="lead">選一個最像你的人,看看 Duet 在你的一天裡能做什麼,以及要先準備什麼。這裡只寫 Duet 現在真的有的功能;還沒做好的會直接寫在「注意」。</p>
+<div class="chips" id="chips" role="group" aria-label="選擇你是誰"></div>
+<div id="out" aria-live="polite"></div>
+<p class="m" style="margin-top:28px">標籤說明:<span class="tag">iPhone</span>需要 iPhone App(用 SideStore 側載);<span class="tag pc">電腦端</span>需要 Windows 電腦開著 Duet 電腦端;<span class="tag opt">選用</span>要額外設定或自備金鑰/裝置。所有資料留在你自己的電腦和手機,不上傳到 Duet 的伺服器。</p>
+<script>
+var T=function(k){return {p:'<span class="tag">iPhone</span>',c:'<span class="tag pc">電腦端</span>',o:'<span class="tag opt">選用</span>'}[k]};
+var P=[
+{id:'student',name:'學生',emoji:'🎒',h:'一個準備考試的高中生',sub:'功課、複習、專心、早點睡——Duet 把這些接在一起。',
+ steps:[
+ ['07:00','看今天要上什麼課','「課表」告訴你今天上什麼課、下一節是什麼;「今天」把行程、期限、待辦統整成一頁。','p'],
+ ['課間','想到什麼用說的','「說給 Duet 聽」把一句話變成筆記或待辦,不用打字。','p'],
+ ['17:30','用筆記複習','「Duet 筆記」裡的閃卡可以複習;答不出來的會晚點再出。','p'],
+ ['19:30','寫程式練習','「C++ 課程」從零到 APCS,寫完直接在電腦上編譯、批改(這個功能會在電腦上執行程式,預設關閉,要自己開)。','po'],
+ ['20:00','開始專心','電腦端的「專注 25 分鐘」封鎖干擾網站(需系統管理員執行),時間到自動解除並通知你休息;連續用電腦太久會提醒你起來動一動。','co'],
+ ['23:00','睡前','「睡前」場景一鍵把音量、亮度降下來並關螢幕;太晚了也會提醒你該睡了。','c']],
+ need:'一台 Windows 電腦裝 Duet 電腦端;筆記、課表、說話記錄要搭配 iPhone App。',
+ note:'課表、筆記複習卡、說給 Duet 聽等功能目前只有 iPhone 版,而且部分依賴作者自用的進階電腦端;精簡版電腦端(DuetCore)不一定都有,實際以「功能確認」頁為準。安卓只能用網頁版(遙控電腦、智慧家場景)。'},
+{id:'worker',name:'上班族',emoji:'💼',h:'每天被信件和會議追著跑的上班族',sub:'少切換視窗、少漏掉期限。',
+ steps:[
+ ['08:30','出門前看一眼','「今天」「我的狀態」整理行程、期限和待辦,離線也看得到。','p'],
+ ['09:30','信件變任務','把信件貼給「信件→任務」,找出要做的事和日期;「快速助手」幫你寫初稿、翻譯。','po'],
+ ['10:00','開會','「開會」場景一鍵把電腦音量調成 0、亮度拉高。','c'],
+ ['14:00','上台簡報','手機當翻頁筆:電腦端可新增「下一頁/上一頁/開始簡報」按鈕,在手機上按。','co'],
+ ['15:30','離開座位','「離開座位」場景一鍵靜音並鎖定電腦。','c'],
+ ['18:00','下班','電腦忘了關?按「30 分鐘後關機」,要取消也能在手機取消。','c']],
+ need:'Windows 電腦 + Duet 電腦端;信件、日曆功能需要 iPhone App。',
+ note:'信件是你手動貼上,Duet 不會自動讀你的信箱;簡報翻頁按鈕要先在電腦設定頁新增(一次就好);行程、信件功能的完整程度以「功能確認」頁為準。'},
+{id:'homemaker',name:'主婦 / 家庭照顧者',emoji:'🏠',h:'一個人顧一整個家的人',sub:'家裡的小事很多,Duet 幫你記、幫你算、幫你一鍵處理。',
+ steps:[
+ ['07:30','今天家裡有什麼','「今天」和「Duet 日曆」顯示接送、回診、繳費這些行程。','p'],
+ ['10:00','買菜算預算','「一週預算」貼上價格,幫你算單價、在預算內挑要買什麼。','p'],
+ ['11:00','團購對帳','「團購核對」把截圖變成訂單,不用手抄。','po'],
+ ['14:00','定時提醒','電腦端可設每日重複提醒(例如 16:30「去接小孩」),到時間手機收到通知。','co'],
+ ['17:00','回家場景','有智慧插座(如 Shelly、Tasmota 這類能用網址開關的)時,「回家」場景一鍵開燈、開風扇;也能設 30 分鐘後自動關。','po'],
+ ['突發','緊急狀況','「保護」有地震、火災、有人受傷、遇到危險的人、手機沒訊號、懷疑被詐騙的步驟,離線也能看。','p']],
+ need:'預算、團購、保護只需要 iPhone App;智慧家和提醒需要 Windows 電腦端開著。',
+ note:'智慧家只支援「用網址就能開關」的裝置(Webhook 型),不是所有品牌都能接。「保護」是步驟提示,不能取代 119 / 110。'},
+{id:'parent',name:'家長',emoji:'👨‍👧',h:'想讓孩子用電腦但不想天天盯著的家長',sub:'設好規則,不用吵架。',
+ steps:[
+ ['一次設定','限制音量','電腦端設定「音量上限」,孩子(或網頁、場景、計時器)怎麼調都不會超過;只有在那台電腦上才能改。','c'],
+ ['晚餐後','設定專心時間','「專注」封鎖遊戲和影音網站一段時間,到點自動解除(封鎖需要用系統管理員執行 Duet 電腦端)。','co'],
+ ['21:30','準備睡覺','按「30 分鐘後關機」:30 分鐘後關機,不會強制關閉沒存檔的程式,孩子也看得到倒數,隨時可以取消。','c'],
+ ['隨時','傳東西到孩子的電腦','「傳到電腦」把文字、網址、照片丟到那台電腦。','p']],
+ need:'孩子用的那台 Windows 電腦裝 Duet 電腦端;封鎖網站要系統管理員權限。',
+ note:'Duet 不是監控軟體:不會偷看孩子的畫面或內容。限制做在那一台電腦上,孩子換別台電腦就管不到。'},
+{id:'senior',name:'長輩',emoji:'👵',h:'不太習慣複雜手機畫面的長輩',sub:'大字、大按鈕,常用的事一兩下就好。',
+ steps:[
+ ['早上','大字大按鈕','網頁版有「大字大按鈕模式」,字級和按鈕都放大,孩子可以先幫忙設好。','p'],
+ ['看電視/電腦','調音量','在手機上就能調電腦音量、亮度、靜音,不用彎腰找按鍵。','c'],
+ ['接到可疑電話','懷疑被詐騙','「保護」有「懷疑被詐騙」的步驟:先停止匯款、不給驗證碼與密碼,掛掉電話自己查證,再撥 165 反詐騙專線;離線也能看。','p'],
+ ['不舒服','有人受傷/不舒服','照步驟檢查,什麼時候該叫 119 寫得很清楚。','p']],
+ need:'最簡單:手機瀏覽器 + 一台 Windows 電腦(請家人幫忙裝一次)。',
+ note:'「保護」是提示步驟,不能取代緊急電話。第一次設定建議由家人協助。'},
+{id:'creator',name:'創作者',emoji:'🎬',h:'手機拍、電腦剪的創作者',sub:'素材從手機到電腦,少一步是一步。',
+ steps:[
+ ['拍完','傳到電腦','「傳到電腦」把文字、網址、照片丟過去;分享選單也有「傳到 Duet」。','p'],
+ ['整理素材','自動剪靜音+字幕','「Duet 剪片」傳影片,在電腦上自動剪掉靜音並加字幕。','po'],
+ ['剪輯中','手機當遙控','播放/暫停/下一首都能在手機按,音量用滑桿調。','c'],
+ ['收工','把筆記帶走','「Duet 筆記」和電腦同一本,靈感不會留在別的裝置。','p']],
+ need:'Windows 電腦 + iPhone App;影片剪輯需要電腦有足夠效能。',
+ note:'「Duet 剪片」是自動粗剪(靜音+字幕),不是完整剪輯軟體。'},
+{id:'remote',name:'在家工作者',emoji:'🖥',h:'有一台主力電腦、人常常不在它旁邊',sub:'離開座位也能管電腦。',
+ steps:[
+ ['整天','遙控電腦','手機調音量、亮度、播放、鎖定、關螢幕。','c'],
+ ['出門前','傳檔和剪貼簿','手機傳文字到電腦剪貼簿、取得電腦剪貼簿;傳照片和檔案到電腦。','pc'],
+ ['久坐','被提醒起來動','連續用電腦太久,電腦端會通知手機叫你站起來。','co'],
+ ['晚上','叫醒另一台電腦','有另一台支援 Wake-on-LAN 的電腦,可新增一顆「喚醒」按鈕。','co'],
+ ['忘了關','30 分鐘後關機','不在座位也能讓電腦關機,也能取消。','c']],
+ need:'Windows 電腦 + Duet 電腦端;手機用 iPhone App 或網頁版皆可。',
+ note:'遠端喚醒要電腦的主機板和網卡都有開啟 Wake-on-LAN,不是每台都支援。'}
+];
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function show(id){var p=P.filter(function(x){return x.id===id})[0]||P[0];
+ document.querySelectorAll('.chip').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.id===p.id))});
+ var h='<div class="hero"><h2>'+p.emoji+' '+esc(p.h)+'</h2><p>'+esc(p.sub)+'</p></div>';
+ p.steps.forEach(function(s){h+='<div class="step"><div class="time">'+esc(s[0])+'</div><div><b>'+esc(s[1])+'</b><p>'+esc(s[2])+'</p>'+s[3].split('').map(T).join('')+'</div></div>'});
+ h+='<div class="need"><b>要先準備</b>'+esc(p.need)+'</div><div class="note"><b>注意</b>'+esc(p.note)+'</div>';
+ h+='<div class="cta"><a href="features.html">看每個功能需要什麼</a><a class="alt" href="guide.html">動畫教學</a><a class="alt" href="./">回首頁</a></div>';
+ document.getElementById('out').innerHTML=h;try{history.replaceState(null,'','#'+p.id)}catch(e){}document.title='Duet 適合'+p.name+'嗎?'}
+var C=document.getElementById('chips');P.forEach(function(p){var b=document.createElement('button');b.className='chip';b.dataset.id=p.id;b.textContent=p.emoji+' '+p.name;b.setAttribute('aria-pressed','false');b.onclick=function(){show(p.id)};C.appendChild(b)});
+show((location.hash||'').slice(1));
+</script></body></html>
