@@ -22,7 +22,7 @@ input[type=range]{width:100%;min-height:44px}.row{display:flex;justify-content:s
   <p id="lineHint" class="err hide">你正在用 LINE/Facebook/Instagram 等內建瀏覽器,配對資料容易被清掉。請點右上角「⋯」→「用其他瀏覽器開啟」改用 Chrome(或 Safari)。</p><p class="mu">① 電腦先裝並開啟 Duet 電腦端(到 Duet 官網下載、雙擊)<br>② 電腦螢幕會顯示 8 位數「配對碼」<br>③ 在下面輸入它</p>
   <input id="code" type="tel" inputmode="numeric" maxlength="9" placeholder="0000 0000" aria-label="8 位數配對碼" autocomplete="off">
   <p style="margin:12px 0 0"><button id="goPair">連接</button></p><div id="perr" class="err" role="alert"></div></div>
- <p class="mu" id="a2hs"><b>iPhone 建議先「分享 → 加入主畫面」;Android 用 Chrome:右上 ⋮ →「加到主畫面」。再從主畫面的 Duet 圖示打開、在那裡配對</b>(否則 Safari 一週沒開,配對可能被系統清掉)。<br>第一次用?<a href="../guide.html">看圖文教學</a>。這個網頁版不用裝 App,只能遙控:音量、亮度、靜音、鎖定、智慧家與場景。傳檔、日曆等更多功能(場景含燈具、快捷鍵、筆記、待辦)目前請用 iPhone App,電腦設定頁(電腦上開 http://127.0.0.1:8897/_homesetup)可管理裝置。</p>
+ <p class="mu"><span id="a2hs"><b>iPhone 建議先「分享 → 加入主畫面」;Android 用 Chrome:右上 ⋮ →「加到主畫面」。再從主畫面的 Duet 圖示打開、在那裡配對</b>(否則 Safari 一週沒開,配對可能被系統清掉)。<br></span>第一次用?<a href="../guide.html">看圖文教學</a>。這個網頁版不用裝 App,只能遙控:音量、亮度、靜音、鎖定、智慧家與場景。傳檔、日曆等更多功能(場景含燈具、快捷鍵、筆記、待辦)目前請用 iPhone App,電腦設定頁(電腦上開 http://127.0.0.1:8897/_homesetup)可管理裝置。</p>
 </div>
 <div id="main" class="hide">
  <div class="row" id="bar"><span class="mu" id="stat" role="status" aria-live="polite">連線中…</span><button class="sec" style="width:auto;padding:8px 14px" id="reload">重新整理</button></div>
@@ -88,7 +88,7 @@ async function doPair(){
   await kset("priv",kp.privateKey);await kset("pub",b64(pubRaw));await kset("host",base);await kset("token",t.slice(3));
   await load();
  }catch(e){const raw=(e&&e.message)||String(e),m=friendly(e);$("perr").textContent=/Failed to fetch|NetworkError|Load failed/i.test(raw)?"連不到電腦,請確認電腦開機、Duet 在跑、手機有網路":m;if(/Failed to fetch|NetworkError|Load failed/i.test(raw))keepCode=true}
- $("goPair").disabled=false;$("goPair").textContent="連接";if($("perr").textContent&&!keepCode)$("code").value="";keepCode=false}
+ $("goPair").disabled=false;$("goPair").textContent="連接";if($("perr").textContent&&!keepCode&&/配對碼錯誤/.test($("perr").textContent))$("code").value="";keepCode=false}
 let keepCode=false;
 function failLoad(){if($("st").textContent==="載入中…")$("st").textContent="載入失敗,請按上方「重新整理」重試";if($("log").textContent==="載入中…")$("log").textContent="載入失敗"}
 function friendly(e){const m=(e&&e.message)||"";if(/Quota|Security/i.test(m+((e&&e.name)||"")))return "這個瀏覽器無法儲存配對(私密瀏覽?),請改用一般視窗";return /[一-鿿]/.test(m)?m:"發生未知錯誤,請稍後再試一次"}
@@ -130,7 +130,7 @@ function cmdsOf(d){return d&&d.type==="switch"?[["on","開"],["off","關"],["tog
 function webOk(x){return !x.when&&(x.steps||[]).every(st=>/^(pc|au)\./.test(st.dev)&&st.dev!=="pc.lock"&&st.dev!=="pc.screen_off")}
 function renderMy(){const all=SCN.filter(x=>!x.builtin),my=all.filter(webOk),hid=all.length-my.length;
  $("myscn").innerHTML=(my.map(x=>'<div class="row" style="margin-bottom:8px"><span><b>'+esc(x.name)+'</b> <span class="mu">'+(x.when?(x.when==="pc_lock"?"電腦鎖定時":"電腦解鎖時"):x.at?(x.at+(x.days?" 週"+x.days.split("").map(c=>DAYN[+c]).join(""):" 每天")):"手動")+'</span></span><span><button class="sec" style="width:auto;margin-right:14px" data-sced="'+esc(x.id)+'" aria-label="編輯場景:'+esc(x.name)+'">編輯</button><button class="sec" style="width:auto" data-scdel="'+esc(x.id)+'" aria-label="刪除場景:'+esc(x.name)+'">刪除</button></span></div>').join("")||'<span class="mu">還沒有可在網頁編輯的場景</span>')+(hid?'<p class="mu">另有 '+hid+' 個場景含燈具/快捷鍵,只能在 iPhone App 編輯。</p>':'')+'<p style="margin:10px 0 0"><button data-scnew="1">新增場景</button></p><p class="mu">網頁版只能用電腦功能(音量、亮度、靜音、音訊輸出);要用燈或快捷鍵請在 iPhone App 或電腦設定頁。</p>'}
-function openEd(sc){EDIT={id:sc?sc.id:"",name:sc?sc.name:"",steps:sc?sc.steps.filter(s=>DEVS.some(d=>d.id===s.dev)).map(s=>({...s})):[],trig:sc&&sc.when?sc.when:sc&&sc.at?"time":"none",at:sc&&sc.at||"22:00",days:new Set((sc&&sc.days||"").split("").map(Number))};drawEd();$("sced").classList.remove("hide");$("sced").scrollIntoView({behavior:"smooth"})}
+function openEd(sc){if(EDIT&&!confirm("目前編輯中的內容還沒儲存,要放棄嗎?"))return;const _sk=sc?(sc.steps||[]).filter(s=>!DEVS.some(d=>d.id===s.dev)).length:0;if(_sk)$("stat").textContent="已略過 "+_sk+" 個這裡無法使用的動作(含燈具或已移除的裝置)";EDIT={id:sc?sc.id:"",name:sc?sc.name:"",steps:sc?(sc.steps||[]).filter(s=>DEVS.some(d=>d.id===s.dev)).map(s=>({...s})):[],trig:sc&&sc.when?sc.when:sc&&sc.at?"time":"none",at:sc&&sc.at||"22:00",days:new Set((sc&&sc.days||"").split("").map(Number))};drawEd();$("sced").classList.remove("hide");$("sced").scrollIntoView({behavior:"smooth"})}
 function drawEd(){const E=EDIT;
  const opt=(sel)=>DEVS.map(d=>'<option value="'+esc(d.id)+'"'+(d.id===sel?" selected":"")+'>'+esc((d.room||"")+"・"+d.name)+'</option>').join("");
  $("sced").innerHTML='<b>'+(E.id?"編輯場景":"新增場景")+'</b><p><input id="en" aria-label="場景名稱" maxlength="20" placeholder="場景名稱,例如:晚安" value="'+esc(E.name)+'" style="font:inherit;width:100%;padding:10px;border-radius:10px"></p>'+
@@ -149,7 +149,7 @@ document.addEventListener("change",e=>{const t=e.target;if(!EDIT||!t.dataset)ret
 document.addEventListener("click",async e=>{const t=e.target;if(!t.dataset)return;
  if(t.dataset.scnew)openEd(null);
  else if(t.dataset.sced)openEd(SCN.find(x=>x.id===t.dataset.sced));
- else if(t.dataset.scdel){if(confirm("刪除這個場景?(它的計時器也會取消)")){try{const r=await call("POST","home/scene-del",{id:t.dataset.scdel});NOTE=r.ok?"已刪除":r.status===403?"網頁版不能刪這個場景":"刪除沒成功,請稍後再試";refresh()}catch(x){$("stat").textContent="連不到電腦,沒刪成"}}}
+ else if(t.dataset.scdel){if(confirm("刪除這個場景?(它的計時器也會取消)")){try{const r=await call("POST","home/scene-del",{id:t.dataset.scdel});if(r.ok&&EDIT&&EDIT.id===t.dataset.scdel){EDIT=null;$("sced").classList.add("hide")}NOTE=r.ok?"已刪除":r.status===403?"網頁版不能刪這個場景":"刪除沒成功,請稍後再試";refresh()}catch(x){$("stat").textContent="連不到電腦,沒刪成"}}}
  else if(!EDIT)return;
  else if(t.dataset.sadd){syncEd();const d=DEVS[0];EDIT.steps.push({dev:d.id,cmd:cmdsOf(d)[0][0],value:Number(d.min||0)});drawEd()}
  else if(t.dataset.sx){syncEd();EDIT.steps.splice(+t.dataset.sx,1);drawEd()}
