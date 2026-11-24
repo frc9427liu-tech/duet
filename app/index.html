@@ -10,7 +10,7 @@
 h1{font-size:24px;margin:4px 0 12px}h2{font-size:16px;color:var(--mu);margin:22px 4px 8px;font-weight:600}
 .card{background:var(--card);border-radius:14px;padding:14px 16px;margin-bottom:10px}
 button{font:inherit;border:0;border-radius:12px;padding:12px 16px;background:var(--ac);color:#fff;font-weight:600;width:100%}
-button,select,input[type=time],input[type=number],input[type=text]{min-height:44px;font:inherit}#sced{scroll-margin-top:64px}#bar{position:sticky;top:0;background:var(--bg);padding:6px 0;z-index:5}button.sec{background:rgba(127,127,127,.18);color:var(--tx)}button:disabled{opacity:.5}
+button,select,input[type=time],input[type=number],input[type=text]{min-height:44px;font:inherit}body.big{font-size:20px}body.big .mu,body.big .err{font-size:20px}body.big h2{font-size:22px}body.big button,body.big select,body.big input[type=time],body.big input[type=number],body.big input[type=text]{min-height:60px;font-size:20px}body.big .grid{grid-template-columns:1fr}body.big input[type=range]{min-height:60px}#sced{scroll-margin-top:64px}#bar{position:sticky;top:0;background:var(--bg);padding:6px 0;z-index:5}button.sec{background:rgba(127,127,127,.18);color:var(--tx)}button:disabled{opacity:.5}
 input[type=tel]{font:inherit;width:100%;padding:14px;border-radius:12px;border:1px solid rgba(127,127,127,.3);background:var(--card);color:var(--tx);font-size:28px;letter-spacing:6px;text-align:center}
 input[type=range]{width:100%;min-height:44px}.row{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .mu{color:var(--mu);font-size:16px}.err{color:var(--bad);font-size:16px;margin-top:8px}.off{opacity:.45}
@@ -36,7 +36,7 @@ input[type=range]{width:100%;min-height:44px}.row{display:flex;justify-content:s
   <div id="tlist" class="mu" style="margin-top:10px"></div></div>
  <div id="devs"><p class="mu">載入中…</p></div>
  <h2>最近紀錄</h2><div class="card mu" id="log">載入中…</div>
- <h2>設定</h2><div class="card"><p id="installBox" class="hide"><button id="installBtn">安裝到手機主畫面(像 App 一樣打開)</button></p><button class="sec" id="unpair">解除這支手機與電腦的連接(只清除這支手機)</button>
+ <h2>設定</h2><div class="card"><p id="installBox" class="hide"><button id="installBtn">安裝到手機主畫面(像 App 一樣打開)</button></p><button class="sec" id="bigBtn" aria-pressed="false" style="margin-bottom:10px">大字大按鈕模式:關</button><button class="sec" id="unpair">解除這支手機與電腦的連接(只清除這支手機)</button>
  <p class="mu">要完全撤銷:電腦配對頁 →「管理已配對的手機」。</p></div>
 </div>
 <script>
@@ -104,7 +104,7 @@ async function refresh(){
   const pT=call("GET","home/timers").catch(()=>null),pS=call("GET","home/status").catch(()=>null),pL=call("GET","home/log").catch(()=>null);
   const devs=await rd.json(),sc=await rs.json();if(_my!==_rf)return;if(!Array.isArray(devs)||!Array.isArray(sc))throw new Error("電腦回應格式不對");
   $("scenes").innerHTML=sc.map(x=>'<button class="sec" data-sc="'+esc(x.id)+'">'+esc(x.name)+'</button>').join("")||'<span class="mu">還沒有場景,往下到「我的場景」按「新增場景」建立第一個</span>';
-  DEVS=devs.filter(d=>/^(pc|au)\./.test(d.id)&&d.id!=="pc.lock"&&d.id!=="pc.screen_off");SCN=sc;renderMy();
+  DEVS=devs.filter(d=>/^(pc|au)\./.test(d.id)&&!/^pc\.(lock|screen_off|shutdown30|shutdown_cancel)$/.test(d.id));SCN=sc;renderMy();
   document.querySelectorAll("[data-tm]").forEach(b=>b.disabled=!sc.length);const _tsv=$("tsc").value;$("tsc").innerHTML=sc.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.name)+'</option>').join("");if(_tsv&&sc.some(x=>x.id===_tsv))$("tsc").value=_tsv;
   try{const rt2=await pT;if(_my!==_rf)return;if(rt2&&rt2.ok){const T=await rt2.json();$("tlist").innerHTML=Array.isArray(T)&&T.length?T.map(x=>esc(x.name)+" · 剩 "+Math.ceil((Number(x.left)||0)/60)+" 分 <button class='sec' style='width:auto;padding:6px 12px;margin-left:8px' data-tc='"+esc(x.id)+"' aria-label='取消計時器:"+esc(x.name)+"'>取消</button>").join("<br>"):"沒有進行中的計時器"}}catch(e){}
   const rooms={};devs.forEach(d=>{const k=d.room||"我的裝置";(rooms[k]=rooms[k]||[]).push(d)});
@@ -127,7 +127,7 @@ let dts={};document.addEventListener("input",e=>{const t=e.target;if(t.dataset&&
 
 let DEVS=[],SCN=[],EDIT=null,SAVING=false;const DAYN=["一","二","三","四","五","六","日"];
 function cmdsOf(d){return d&&d.type==="switch"?[["on","開"],["off","關"],["toggle","切換"]]:d&&d.type==="dial"?[["set","設成"]]:[["press","按下"]]}
-function webOk(x){return !x.when&&(x.steps||[]).every(st=>/^(pc|au)\./.test(st.dev)&&st.dev!=="pc.lock"&&st.dev!=="pc.screen_off")}
+function webOk(x){return !x.when&&(x.steps||[]).every(st=>/^(pc|au)\./.test(st.dev)&&!/^pc\.(lock|screen_off|shutdown30|shutdown_cancel)$/.test(st.dev))}
 function renderMy(){const all=SCN.filter(x=>!x.builtin),my=all.filter(webOk),hid=all.length-my.length;
  $("myscn").innerHTML=(my.map(x=>'<div class="row" style="margin-bottom:8px"><span><b>'+esc(x.name)+'</b> <span class="mu">'+(x.when?(x.when==="pc_lock"?"電腦鎖定時":"電腦解鎖時"):x.at?(x.at+(x.days?" 週"+x.days.split("").map(c=>DAYN[+c]).join(""):" 每天")):"手動")+'</span></span><span><button class="sec" style="width:auto;margin-right:14px" data-sced="'+esc(x.id)+'" aria-label="編輯場景:'+esc(x.name)+'">編輯</button><button class="sec" style="width:auto" data-scdel="'+esc(x.id)+'" aria-label="刪除場景:'+esc(x.name)+'">刪除</button></span></div>').join("")||'<span class="mu">還沒有可在網頁編輯的場景</span>')+(hid?'<p class="mu">另有 '+hid+' 個場景含燈具/快捷鍵,只能在 iPhone App 編輯。</p>':'')+'<p style="margin:10px 0 0"><button data-scnew="1">新增場景</button></p><p class="mu">網頁版只能用電腦功能(音量、亮度、靜音、音訊輸出);要用燈或快捷鍵請在 iPhone App 或電腦設定頁。</p>'}
 function openEd(sc){if(EDIT&&!confirm("目前編輯中的內容還沒儲存,要放棄嗎?"))return;const _sk=sc?(sc.steps||[]).filter(s=>!DEVS.some(d=>d.id===s.dev)).length:0;if(_sk)$("stat").textContent="已略過 "+_sk+" 個這裡無法使用的動作(含燈具或已移除的裝置)";EDIT={id:sc?sc.id:"",name:sc?sc.name:"",steps:sc?(sc.steps||[]).filter(s=>DEVS.some(d=>d.id===s.dev)).map(s=>({...s})):[],trig:sc&&sc.when?sc.when:sc&&sc.at?"time":"none",at:sc&&sc.at||"22:00",days:new Set((sc&&sc.days||"").split("").map(Number))};drawEd();$("sced").classList.remove("hide");$("sced").scrollIntoView({behavior:"smooth"})}
@@ -166,6 +166,9 @@ async function load(){
 window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();window._ip=e;$("installBox").classList.remove("hide")});$("installBtn").onclick=async()=>{if(window._ip){window._ip.prompt();await window._ip.userChoice;$("installBox").classList.add("hide")}};
 if(window.matchMedia&&matchMedia("(display-mode: standalone)").matches||navigator.standalone){const t=document.getElementById("a2hs");if(t)t.classList.add("hide")}
 if(/Line\/|FBAN|FBAV|Instagram|MicroMessenger/i.test(navigator.userAgent))$("lineHint").classList.remove("hide");
+function applyBig(on){document.body.classList.toggle("big",on);const b=$("bigBtn");if(b){b.textContent="大字大按鈕模式:"+(on?"開":"關");b.setAttribute("aria-pressed",String(on))}}
+try{applyBig(localStorage.getItem("duetBig")==="1")}catch(e){}
+$("bigBtn").onclick=()=>{const on=!document.body.classList.contains("big");try{localStorage.setItem("duetBig",on?"1":"0")}catch(e){}applyBig(on)};
 $("goPair").onclick=doPair;$("reload").onclick=refresh;
 $("unpair").onclick=async()=>{if(confirm("只清除這支手機上的配對,確定?")){await kclear();S=null;load()}};
 $("code").addEventListener("input",e=>{let v=e.target.value.replace(/\D/g,"").slice(0,8);e.target.value=v.length>4?v.slice(0,4)+" "+v.slice(4):v});
