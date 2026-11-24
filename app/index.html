@@ -49,7 +49,7 @@ async function sha(s){return hex(await crypto.subtle.digest("SHA-256",typeof s==
 let _db=null;const DB=()=>_db||(_db=new Promise((ok,no)=>{const r=indexedDB.open("duet",1);r.onupgradeneeded=()=>r.result.createObjectStore("k");r.onsuccess=()=>ok(r.result);r.onerror=()=>{_db=null;no(r.error)}}));
 async function kget(k){const d=await DB();return new Promise(ok=>{const q=d.transaction("k").objectStore("k").get(k);q.onsuccess=()=>ok(q.result);q.onerror=()=>ok(null)})}
 async function kset(k,v){const d=await DB();return new Promise((ok,no)=>{const t=d.transaction("k","readwrite");t.objectStore("k").put(v,k);t.oncomplete=ok;t.onerror=()=>no(t.error);t.onabort=()=>no(t.error||new Error("QuotaExceeded"))})}
-async function kclear(){const d=await DB();return new Promise(ok=>{const t=d.transaction("k","readwrite");t.objectStore("k").clear();t.oncomplete=ok})}
+async function kclear(){const d=await DB();return new Promise(ok=>{const t=d.transaction("k","readwrite");t.objectStore("k").clear();t.oncomplete=ok;t.onerror=ok;t.onabort=ok})}
 function der(raw){const f=a=>{let i=0;while(i<a.length-1&&a[i]===0)i++;a=a.slice(i);if(a[0]&128)a=[0,...a];return [2,a.length,...a]};
  const r=f([...raw.slice(0,32)]),s=f([...raw.slice(32)]);return new Uint8Array([48,r.length+s.length,...r,...s])}
 let S=null;
@@ -91,11 +91,11 @@ async function doPair(){
  $("goPair").disabled=false;$("goPair").textContent="連接";if($("perr").textContent&&!keepCode)$("code").value="";keepCode=false}
 let keepCode=false;
 function failLoad(){if($("st").textContent==="載入中…")$("st").textContent="載入失敗,請按上方「重新整理」重試";if($("log").textContent==="載入中…")$("log").textContent="載入失敗"}
-function friendly(e){const m=(e&&e.message)||"";return /[一-鿿]/.test(m)?m:"發生未知錯誤,請稍後再試一次"}
+function friendly(e){const m=(e&&e.message)||"";if(/Quota|Security/i.test(m+((e&&e.name)||"")))return "這個瀏覽器無法儲存配對(私密瀏覽?),請改用一般視窗";return /[一-鿿]/.test(m)?m:"發生未知錯誤,請稍後再試一次"}
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 let _rf=0,NOTE="";
 async function refresh(){
- const _my=++_rf;$("stat").textContent=NOTE||"更新中…";
+ const _my=++_rf,_n=NOTE;NOTE="";$("stat").textContent=_n||"更新中…";
  try{
   const [rd,rs]=await Promise.all([call("GET","home/devices"),call("GET","home/scenes")]);if(_my!==_rf)return;
   if(rd.status===401||rd.status===403||rd.status===404){$("stat").innerHTML='<span class="err">配對失效:可能被電腦撤銷、電腦重設了,或手機時間不準(差 2 分鐘以上)。請到最下面按「解除這支手機與電腦的連接」,再重新配對</span>';failLoad();return}
@@ -106,7 +106,7 @@ async function refresh(){
   $("scenes").innerHTML=sc.map(x=>'<button class="sec" data-sc="'+esc(x.id)+'">'+esc(x.name)+'</button>').join("")||'<span class="mu">還沒有場景,往下到「我的場景」按「新增場景」建立第一個</span>';
   DEVS=devs.filter(d=>/^(pc|au)\./.test(d.id)&&d.id!=="pc.lock"&&d.id!=="pc.screen_off");SCN=sc;renderMy();
   document.querySelectorAll("[data-tm]").forEach(b=>b.disabled=!sc.length);const _tsv=$("tsc").value;$("tsc").innerHTML=sc.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.name)+'</option>').join("");if(_tsv&&sc.some(x=>x.id===_tsv))$("tsc").value=_tsv;
-  try{const rt2=await pT;if(rt2&&rt2.ok){const T=await rt2.json();$("tlist").innerHTML=Array.isArray(T)&&T.length?T.map(x=>esc(x.name)+" · 剩 "+Math.ceil(Number(x.left)/60)+" 分 <button class='sec' style='width:auto;padding:6px 12px;margin-left:8px' data-tc='"+esc(x.id)+"' aria-label='取消計時器:"+esc(x.name)+"'>取消</button>").join("<br>"):"沒有進行中的計時器"}}catch(e){}
+  try{const rt2=await pT;if(_my!==_rf)return;if(rt2&&rt2.ok){const T=await rt2.json();$("tlist").innerHTML=Array.isArray(T)&&T.length?T.map(x=>esc(x.name)+" · 剩 "+Math.ceil((Number(x.left)||0)/60)+" 分 <button class='sec' style='width:auto;padding:6px 12px;margin-left:8px' data-tc='"+esc(x.id)+"' aria-label='取消計時器:"+esc(x.name)+"'>取消</button>").join("<br>"):"沒有進行中的計時器"}}catch(e){}
   const rooms={};devs.forEach(d=>{const k=d.room||"我的裝置";(rooms[k]=rooms[k]||[]).push(d)});
   if(!devs.length){$("devs").innerHTML='<p class="mu">這台電腦還沒有可控制的裝置(到電腦上的設定頁新增,或在 iPhone App 的智慧家加入)</p>'}else $("devs").innerHTML=Object.entries(rooms).map(([room,L])=>"<h2>"+esc(room)+"</h2>"+L.map(d=>{
    const off=d.online===false?" off":"",nm="<b>"+esc(d.name)+"</b>"+(d.online===false?' <span class="mu">離線</span>':"");
@@ -115,7 +115,7 @@ async function refresh(){
    return '<div class="card'+off+'"><div class="row">'+nm+'<span><button style="width:auto;margin-right:6px" data-on="'+esc(d.id)+'" aria-label="開:'+esc(d.name)+'">開</button><button class="sec" style="width:auto" data-off="'+esc(d.id)+'" aria-label="關:'+esc(d.name)+'">關</button></span></div></div>'}).join("")).join("");
   try{const rt=await pS;if(rt&&rt.ok){const t=await rt.json();$("st").innerHTML="<b>"+esc(t.host)+"</b><br>CPU "+Number(t.cpu)+"% · 記憶體 "+Number(t.mem)+"%(共 "+Number(t.mem_gb)+" GB)"+(t.battery==null?" · 插電(桌機)":" · 電量 "+Number(t.battery)+"%"+(t.plugged?"(充電中)":""))}}catch(e){}
   try{const rl=await pL;if(rl&&rl.ok){const L=await rl.json();$("log").innerHTML=Array.isArray(L)&&L.length?L.slice(0,8).map(x=>esc(new Date((+x.t||0)*1000).toLocaleTimeString("zh-TW",{hour:"2-digit",minute:"2-digit"})+" "+(x.ok===false?"✗ ":"✓ ")+(x.what||""))).join("<br>"):"還沒有紀錄"}}catch(e){}
-  if($("st").textContent==="載入中…")$("st").textContent="暫時無法取得電腦狀態";if($("log").textContent==="載入中…")$("log").textContent="暫時無法取得紀錄";if($("tlist").textContent==="")$("tlist").textContent="暫時無法取得計時器清單";if(_my!==_rf)return;$("stat").textContent=(NOTE?NOTE+" · ":"")+"已連線 · "+new Date().toLocaleTimeString("zh-TW",{hour:"2-digit",minute:"2-digit"});
+  if($("st").textContent==="載入中…")$("st").textContent="暫時無法取得電腦狀態";if($("log").textContent==="載入中…")$("log").textContent="暫時無法取得紀錄";if($("tlist").textContent==="")$("tlist").textContent="暫時無法取得計時器清單";if(_my!==_rf)return;$("stat").textContent=(_n?_n+" · ":"")+"已連線 · "+new Date().toLocaleTimeString("zh-TW",{hour:"2-digit",minute:"2-digit"});
  }catch(e){$("stat").innerHTML='<span class="err">'+esc(/Failed to fetch|NetworkError|Load failed/i.test((e&&e.message)||"")?"連不到電腦":friendly(e))+"(電腦要開機、Duet 要在跑)</span>";if($("st").textContent==="載入中…")$("st").innerHTML='載入失敗,請按上方「重新整理」重試';if($("log").textContent==="載入中…")$("log").textContent='載入失敗'}}
 async function act(id,cmd,value){try{const r=await call("POST","home/act",{id,cmd,value});$("stat").textContent=r.ok?"已送出":(r.status===404?"找不到這個裝置":r.status===502?"裝置離線":r.status===401||r.status===403?"沒有權限或配對失效":"沒成功,請稍後再試")}catch(e){$("stat").textContent="連不到電腦"}}
 document.addEventListener("click",async e=>{const t=e.target;
@@ -127,7 +127,7 @@ let dts={};document.addEventListener("input",e=>{const t=e.target;if(t.dataset&&
 
 let DEVS=[],SCN=[],EDIT=null,SAVING=false;const DAYN=["一","二","三","四","五","六","日"];
 function cmdsOf(d){return d&&d.type==="switch"?[["on","開"],["off","關"],["toggle","切換"]]:d&&d.type==="dial"?[["set","設成"]]:[["press","按下"]]}
-function webOk(x){return !x.when&&x.steps.every(st=>/^(pc|au)\./.test(st.dev)&&st.dev!=="pc.lock"&&st.dev!=="pc.screen_off")}
+function webOk(x){return !x.when&&(x.steps||[]).every(st=>/^(pc|au)\./.test(st.dev)&&st.dev!=="pc.lock"&&st.dev!=="pc.screen_off")}
 function renderMy(){const all=SCN.filter(x=>!x.builtin),my=all.filter(webOk),hid=all.length-my.length;
  $("myscn").innerHTML=(my.map(x=>'<div class="row" style="margin-bottom:8px"><span><b>'+esc(x.name)+'</b> <span class="mu">'+(x.when?(x.when==="pc_lock"?"電腦鎖定時":"電腦解鎖時"):x.at?(x.at+(x.days?" 週"+x.days.split("").map(c=>DAYN[+c]).join(""):" 每天")):"手動")+'</span></span><span><button class="sec" style="width:auto;margin-right:14px" data-sced="'+esc(x.id)+'" aria-label="編輯場景:'+esc(x.name)+'">編輯</button><button class="sec" style="width:auto" data-scdel="'+esc(x.id)+'" aria-label="刪除場景:'+esc(x.name)+'">刪除</button></span></div>').join("")||'<span class="mu">還沒有可在網頁編輯的場景</span>')+(hid?'<p class="mu">另有 '+hid+' 個場景含燈具/快捷鍵,只能在 iPhone App 編輯。</p>':'')+'<p style="margin:10px 0 0"><button data-scnew="1">新增場景</button></p><p class="mu">網頁版只能用電腦功能(音量、亮度、靜音、音訊輸出);要用燈或快捷鍵請在 iPhone App 或電腦設定頁。</p>'}
 function openEd(sc){EDIT={id:sc?sc.id:"",name:sc?sc.name:"",steps:sc?sc.steps.filter(s=>DEVS.some(d=>d.id===s.dev)).map(s=>({...s})):[],trig:sc&&sc.when?sc.when:sc&&sc.at?"time":"none",at:sc&&sc.at||"22:00",days:new Set((sc&&sc.days||"").split("").map(Number))};drawEd();$("sced").classList.remove("hide");$("sced").scrollIntoView({behavior:"smooth"})}
