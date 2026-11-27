@@ -246,6 +246,59 @@ footer a{display:block;padding:4px 0}footer a:hover{color:var(--ink);text-decora
  .cd{min-height:440px}
 }
 @media(prefers-reduced-motion:reduce){.tl li.on i{animation:none;height:100%}.rdesk .vol:after{animation:none}.rv i,.rt.hot,.rt.hot svg{animation:none}}
+
+/* ===== 2026-11-27 新設計:白色展廳風(依 AI\提示詞\網站設計-白色展廳風) ===== */
+:root{--blue:#0071e3;--blue-d:#0066cc;--blue-l:#f5f5f7;--blue-m:#d6d6d6;--navy:#1d1d1f;--ink:#1d1d1f;--mute:#707070;--line:#d6d6d6;--bg:#fff;--shadow:none;
+  --pink:#f5f5f7;--pink-t:#1d1d1f;--green-l:#f5f5f7;--green-t:#1d1d1f;--amber-l:#f5f5f7;--amber-t:#b64400}
+body{font:17px/1.47 "SF Pro Text",-apple-system,BlinkMacSystemFont,Inter,"Helvetica Neue","Noto Sans TC","Microsoft JhengHei",Arial,sans-serif;letter-spacing:-.374px;color:#1d1d1f}
+h1,h2,h3{font-family:"SF Pro Display",-apple-system,BlinkMacSystemFont,Inter,"Helvetica Neue","Noto Sans TC","Microsoft JhengHei",Arial,sans-serif;font-weight:600}
+.top{background:rgba(255,255,255,.9);backdrop-filter:saturate(180%) blur(20px);box-shadow:0 1px 0 #e6e6e8}
+.row1{height:52px}
+.brand{font-size:19px;font-weight:600;letter-spacing:.23px}
+.logo{background:#1d1d1f;width:22px;height:22px}.logo:after{inset:6px}
+.row1 nav a,.sub a{font-size:12px;color:rgba(0,0,0,.8);letter-spacing:-.12px;border-radius:0;padding:8px 10px}
+.row1 nav a:hover{background:none;color:#000}
+.sub{background:#fafafc;border-top:1px solid #e6e6e8}
+.sub a.on{background:none;color:#1d1d1f;font-weight:600}
+.btn{background:#0071e3;color:#fff;border-radius:9999px;padding:11px 22px;font-size:17px;font-weight:400;letter-spacing:-.374px;box-shadow:none}
+.btn:hover{background:#0077ed;box-shadow:none}
+.btn.lg{padding:14px 28px;font-size:17px}
+.btn.soft{background:transparent;color:#1d1d1f;box-shadow:inset 0 0 0 1px #86868b}
+.btn.soft:hover{background:transparent;color:#000}
+.btn.off{background:#e6e6e8;color:#86868b}
+.sub .btn{padding:5px 14px;font-size:12px;letter-spacing:-.12px}
+.hero h1{font-size:clamp(44px,7vw,80px);line-height:1.05;letter-spacing:-1.2px;font-weight:600}
+.hero .meta,.hero .terms{color:#707070;letter-spacing:-.224px}
+section.s{padding-top:90px;padding-bottom:90px}
+section.s:nth-of-type(even){background:#f5f5f7}
+.h2{font-size:clamp(32px,4.4vw,48px);line-height:1.08;font-weight:600;letter-spacing:-.003em}
+.h2 .p,.p.blue,.p.pink,.p.green,.p.amber{background:none!important;color:inherit!important;padding:0;border-radius:0}
+.h2 .p svg{display:none}
+.lead2{color:#707070;font-size:21px;line-height:1.38;letter-spacing:.231px}
+.cd,.cd.c1,.cd.c2,.cd.c3,.cd.c4{background:#fff;color:#1d1d1f;border-color:transparent;box-shadow:none!important;border-radius:28px}
+section.s:nth-of-type(odd) .cd{background:#f5f5f7}
+.cd small{color:#707070}
+.cd:hover{transform:none}
+.plus,.c2 .plus,.c4 .plus{background:rgba(210,210,215,.64);color:rgba(0,0,0,.56);box-shadow:none}
+.big,.big.pk,.big.bl,.big.am{background:#f5f5f7;border-radius:28px}
+section.s:nth-of-type(even) .big{background:#fff}
+.split .tx h3{font-size:clamp(28px,3.4vw,40px);line-height:1.1}
+.split .tx p{color:#707070;font-size:17px;line-height:1.47}
+.lnk,a.lnk,.hint a,.faq a,.dc a.hint{color:#0066cc}
+.mcal,.mrem,.mph,.spot,.win,.ibx,.rdesk{box-shadow:0 0 0 1px #e6e6e8!important}
+.dc{border-radius:28px;box-shadow:none;border:0;background:#fff}
+section.s:nth-of-type(odd) .dc{background:#f5f5f7}
+.dc .tag,.tag.ok,.tag.soon{background:none!important;color:#b64400!important;padding:0;border-radius:0;font-size:12px;font-weight:600;letter-spacing:-.12px}
+.faq details{border-top:1px solid #d6d6d6;border-radius:0;background:none;box-shadow:none}
+.nb{border-radius:28px;box-shadow:none}
+.nb.dk{background:#1d1d1f;color:#f5f5f7}
+.circle{background:#f5f5f7!important;box-shadow:none!important}
+.c1 .panel,.c2 .panel,.c3 .panel,.c4 .panel{background:transparent!important}
+.cd small{color:#707070!important}
+.dc.me{border:0!important}
+#download .card,#download [style*="rgba(10,132,255"]{background:#f5f5f7!important}
+#download [style*="rgba(127,127,127"]{background:#f5f5f7!important}
+@media (max-width:700px){.hero h1{letter-spacing:-.6px}section.s{padding-top:64px;padding-bottom:64px}}
 </style>
 </head>
 <body>
@@ -269,7 +322,7 @@ footer a{display:block;padding:4px 0}footer a:hover{color:var(--ink);text-decora
     <h1>手機和電腦,<br>連成一個生活</h1>
     <div class="acts">
       <a class="btn lg" href="#download"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z"/></svg>下載 Duet</a>
-      <span class="meta" id="plat">電腦:Windows 10/11 · 手機:iPhone(Android 測試中)· 全部設定約 40 分鐘(iPhone 那段最久)</span>
+      <span class="meta" id="plat">電腦:Windows 10/11 · 手機:iPhone、Android · 全部設定約 40 分鐘(iPhone 那段最久)</span>
       <a class="lnk" href="#sync">看它怎麼用 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M7 7h10v10h-2V10.4L6.4 19 5 17.6 13.6 9H7z"/></svg></a>
     </div>
     <p class="terms">學生專題 · 公開測試中 · 免註冊帳號。連線走你自己的電腦,檔案不經過我們的伺服器。</p>
@@ -403,11 +456,15 @@ footer a{display:block;padding:4px 0}footer a:hover{color:var(--ink);text-decora
   <h2 class="h2">了解 Duet 的最新動態</h2>
   <div class="news">
     <div class="nb"><h3>更新日誌</h3><div class="log">
+      <div><time>2026-11-27</time><b>電腦 1.2</b><span>Windows 電腦端變成單一 Duet.exe,雙擊就跳出配對碼;iPhone、Android 都能配對;可填自己的免費 AI 金鑰</span></div>
+      <div><time>2026-11-27</time><b>6.20</b><span>iPhone 桌面小工具「Duet 今日」;聊天出現求助字眼時一定顯示 1925 安心專線並可直接撥打</span></div>
+      <div><time>2026-11-27</time><b>Android 1.2</b><span>快速助手、電腦傳來的、分享到電腦、桌面小工具</span></div>
+      <div><time>2026-11-25</time><b>6.19</b><span>手寫筆記(空白/橫線/方格/康乃爾紙,支援觸控筆)、跟 Duet 聊天</span></div>
       <div><time>2026-11-22</time><b>5.1</b><span>首頁新增「傳到電腦」</span></div>
       <div><time>2026-11-21</time><b>5.0</b><span>首頁紅點每 15 秒自動更新</span></div>
       <div><time>2026-11-20</time><b>4.9</b><span>筆記/待辦深連結、日曆事件提醒</span></div>
       <div><time>2026-11-19</time><b>4.8</b><span>電腦遙控頁</span></div></div></div>
-    <div class="nb dk"><h3>接下來</h3><p>Windows 正式安裝程式、固定連線網址、Android 日曆與剪貼簿、Mac 版評估。</p></div>
+    <div class="nb dk"><h3>接下來</h3><p>程式簽章(去掉「未知發行者」提示)、固定連線網址、Android 補齊課表與習慣打卡、Mac 版評估。</p></div>
   </div>
 </div></section>
 
@@ -418,7 +475,7 @@ footer a{display:block;padding:4px 0}footer a:hover{color:var(--ink);text-decora
     <details><summary>Duet 是什麼?</summary><p>一套讓手機和電腦連動的工具:電腦端是 Windows 程式,手機端是 App。電腦上也加了一些桌面小工具,但核心是兩邊互通。</p></details>
     <details><summary>我的檔案會經過你們的伺服器嗎?</summary><p>不會經過我們:我們沒有伺服器也沒有帳號系統。連線走你自己電腦建立的 Cloudflare 臨時通道,流量會經過 Cloudflare 的網路。</p></details>
     <details><summary>連線網址安全嗎?</summary><p>網址含隨機密碼,請勿外傳;關閉分享或重開電腦就失效。目前是公開測試,固定網址與更嚴格驗證在規劃中。</p></details>
-    <details><summary>目前不支援什麼?</summary><p>桌面端只有 Windows;Android 版沒有日曆與剪貼簿;連線網址每次重開會變;安裝程式尚未簽章,Windows 可能出現 SmartScreen 提示。</p></details>
+    <details><summary>目前不支援什麼?</summary><p>桌面端只有 Windows;Android 版還沒有課表、習慣打卡與記帳;連線網址每次重開會變;安裝程式尚未簽章,Windows 可能出現 SmartScreen 提示。</p></details>
     <details><summary>Mac 或 Linux 能用嗎?</summary><p>目前桌面端只支援 Windows,Mac 版尚未開發。</p></details>
     <details><summary>誰做的?</summary><p>FRC 9427 程式組成員的學生專題,仍在持續改進,歡迎回報問題與建議。</p></details>
   </div>
@@ -428,12 +485,12 @@ footer a{display:block;padding:4px 0}footer a:hover{color:var(--ink);text-decora
 <section class="s" id="download"><div class="wrap">
   <h2 class="h2">下載 Duet</h2>
   <p class="lead2">電腦端裝在你的電腦,手機端裝在你的手機,兩邊搭配使用。</p>
-  <div style="background:rgba(127,127,127,.12);border-radius:14px;padding:16px 18px;margin:0 0 22px;line-height:1.7"><b>3 步上手(第一次約 40 分鐘,之後免費;不想自己弄,可請會用電腦的人幫你裝一次):</b><br>① 電腦下載「Windows 電腦端」→ 雙擊 → 看到 8 位數配對碼(約 2 分鐘)<br>② iPhone 照下面的教學裝 SideStore,再裝 Duet(約 20 分鐘,最花時間)<br>③ 手機 Duet「設定」→「用配對碼連接」輸入配對碼 → 完成。想控制藍牙喇叭:首頁左上「小助手」會一步步帶你。<br><span style="opacity:.75">只想先試試?先做 ① 就能看到電腦端長怎樣。注意:藍牙「第一次配對」要坐在電腦前做一次,之後才能手機遙控。</span></div>
-  <div class="card" style="background:rgba(10,132,255,.12);border-radius:14px;padding:14px 18px;margin:0 0 18px"><b>不想裝 App?試試網頁版(免 SideStore)</b><br>手機瀏覽器打開 <a href="app/">frc9427liu-tech.github.io/duet/app/</a>,輸入電腦上的配對碼就能遙控音量、亮度、鎖定、智慧家與場景(可「加入主畫面」)。傳檔、日曆等完整功能仍需 iPhone App。<span class="hint"> 測試中,需先更新電腦端到最新版。</span> <a href="features.html">各功能需要什麼?→ 功能確認</a></div>
+  <div style="background:rgba(127,127,127,.12);border-radius:14px;padding:16px 18px;margin:0 0 22px;line-height:1.7"><b>3 步上手(第一次約 40 分鐘,之後免費;不想自己弄,可請會用電腦的人幫你裝一次):</b><br>① 電腦下載「Duet.exe」→ 雙擊 → 約 30 秒後自動跳出 8 位數配對碼(約 2 分鐘)<br>② iPhone 照下面的教學裝 SideStore,再裝 Duet(約 20 分鐘,最花時間);Android 直接下載 APK 安裝(約 3 分鐘)<br>③ 手機 Duet「設定」→「用配對碼連接」輸入配對碼 → 完成。想控制藍牙喇叭:首頁左上「小助手」會一步步帶你。<br><span style="opacity:.75">只想先試試?先做 ① 就能看到電腦端長怎樣。注意:藍牙「第一次配對」要坐在電腦前做一次,之後才能手機遙控。</span></div>
+  <div class="card" style="background:rgba(10,132,255,.12);border-radius:14px;padding:14px 18px;margin:0 0 18px"><b>不想裝 App?試試網頁版(免 SideStore)</b><br>手機瀏覽器打開 <a href="app/">frc9427liu-tech.github.io/duet/app/</a>,輸入電腦上的配對碼就能遙控音量、亮度、鎖定、智慧家與場景(可「加入主畫面」)。傳檔、日曆等完整功能仍需 App。<span class="hint"> 測試中:目前只支援舊版電腦端(DuetCore),新版 Duet.exe 的網頁版還在整合。</span> <a href="features.html">各功能需要什麼?→ 功能確認</a></div>
   <div class="dl" id="dl">
-    <div class="dc"><span class="tag ok">v0 測試版</span><h3>Windows 電腦端</h3><p>下載後雙擊,會自動完成設定並顯示 8 位數配對碼;到手機 Duet「設定」→「用配對碼連接」輸入即可。免安裝 Python。<br><b>它會做的事:</b>常駐在背景、開機自動啟動、建立一條加密連線讓手機連回來;配對碼 10 分鐘有效。要關閉:打開電腦端的配對頁,按最下面「關閉分享並移除」,一鍵停止並移除自動啟動與桌面捷徑(想徹底刪除再刪 %APPDATA%\Duet 資料夾)。</p><a class="btn" href="https://github.com/frc9427liu-tech/duet-dist-7k3q/releases/download/desktop-v0/DuetCore.exe">下載 Windows 電腦端</a><span class="hint">尚未簽章,Windows 會跳「未知發行者」:點「其他資訊」→「仍要執行」。</span></div>
-    <div class="dc"><span class="tag ok">v6.8.1 可用</span><h3>iPhone</h3><p>透過 SideStore 加入 Duet 來源安裝,不需要上架 App Store。需要 SideStore 與 Apple ID。</p><div class="acts2"><a class="btn" href="sidestore://source?url=https://raw.githubusercontent.com/frc9427liu-tech/duet-dist-7k3q/main/source.json">用 SideStore 開啟</a><button class="btn soft" id="cpsrc" type="button">複製來源網址</button></div><a class="hint" href="#ios-guide" onclick="document.querySelector('#ios-guide details').open=true">第一次用?看完整安裝教學 ↓</a><span class="hint" id="cphint">在 SideStore → 來源 → + 貼上網址;按鈕在 iPhone 上才會直接開啟。</span></div>
-    <div class="dc"><span class="tag soon">測試版</span><h3>Android</h3><p>目前提供傳檔與傳文字,日曆與剪貼簿規劃中。APK 測試版僅開放給受邀測試者。</p><a class="btn off">受邀測試</a></div>
+    <div class="dc"><span class="tag ok">1.2.0 · 新</span><h3>Windows 電腦端</h3><p>下載 Duet.exe 後雙擊,自動安裝並在約 30 秒後跳出 8 位數配對碼;到手機 Duet「設定」→「用配對碼連接」輸入即可。iPhone、Android 都能配對,免安裝 Python。<br><b>它會做的事:</b>安裝到你的程式資料夾、桌面放「Duet」捷徑、開一個最小化的黑色視窗(關掉就停止)、建立一條連線讓手機連回來;配對碼 10 分鐘有效。聊天朋友等 AI 功能:配對碼頁「⚙️ 設定 AI」貼上你自己的免費 Gemini 金鑰。資料存在 使用者資料夾\.duet。</p><a class="btn" href="https://github.com/frc9427liu-tech/duet-dist-7k3q/releases/download/pc-v1.2.0/Duet.exe">下載 Duet.exe</a><a class="hint" href="https://github.com/frc9427liu-tech/duet-dist-7k3q/releases/download/pc-v1.2.0/Duet-PC.zip">或下載免安裝壓縮檔(Duet-PC.zip)</a><span class="hint">尚未簽章,Windows 會跳「未知發行者」:點「其他資訊」→「仍要執行」。</span></div>
+    <div class="dc"><span class="tag ok">6.20.2</span><h3>iPhone</h3><p>透過 SideStore 加入 Duet 來源安裝,不需要上架 App Store。需要 SideStore 與 Apple ID。</p><div class="acts2"><a class="btn" href="sidestore://source?url=https://raw.githubusercontent.com/frc9427liu-tech/duet-dist-7k3q/main/source.json">用 SideStore 開啟</a><button class="btn soft" id="cpsrc" type="button">複製來源網址</button></div><a class="hint" href="#ios-guide" onclick="document.querySelector('#ios-guide details').open=true">第一次用?看完整安裝教學 ↓</a><span class="hint" id="cphint">在 SideStore → 來源 → + 貼上網址;按鈕在 iPhone 上才會直接開啟。</span></div>
+    <div class="dc"><span class="tag ok">1.2.2</span><h3>Android</h3><p>Android 7 以上。首頁 17 個功能、聊天、手寫筆記、通知、桌面小工具,從任何 App 分享就能傳到電腦。下載後點開安裝(第一次要允許「安裝未知來源 App」)。</p><a class="btn" href="https://github.com/frc9427liu-tech/duet-dist-7k3q/releases/download/android-v1.2.2/Duet-android.apk">下載 APK</a><span class="hint">還沒有:課表、習慣打卡、記帳(iPhone 才有)。</span></div>
   </div>
   <p class="note">系統需求:Windows 10/11 · iPhone 需 SideStore · Android 需允許安裝未知來源 App。</p>
   <div class="faq" id="ios-guide">
